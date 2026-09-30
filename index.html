@@ -61,6 +61,9 @@ button.danger{color:var(--red)}
 .bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:3px solid var(--green);box-shadow:0 -4px 16px rgba(0,0,0,.12);padding:.6rem 1rem calc(.6rem + env(safe-area-inset-bottom));z-index:10}
 .bar .wrap{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:space-between;align-items:center}
 .bar .grp{display:flex;gap:.5rem;flex-wrap:wrap}
+button.mic{background:#eef8e6;border-color:var(--green)}
+button.mic.on{background:var(--red);color:#fff;border-color:var(--red);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.7}}
 #status{font-size:.75rem;color:var(--g500)}
 #toast{position:fixed;left:50%;bottom:5.5rem;transform:translateX(-50%);background:#111;color:#fff;padding:.7rem 1.1rem;border-radius:10px;font-size:.9rem;max-width:90vw;display:none;z-index:20;text-align:center}
 </style>
@@ -90,6 +93,7 @@ button.danger{color:var(--red)}
 <section><h2>Formación anual</h2><div class="body"><div class="list" id="formacion"></div></div></section>
 
 <section><h2>Observaciones</h2><div class="body">
+  <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem"><button type="button" id="btnMic" class="mic">🎤 Dictar</button><span id="micMsg" style="font-size:.8rem;color:var(--g500)">Pulsa y habla; el texto se añade al final.</span></div>
   <textarea id="observaciones" rows="9" placeholder="Anote aquí las observaciones de la visita"></textarea>
   <div class="sub">Fotos (opcional)</div>
   <input type="file" id="fotoIn" accept="image/*" multiple hidden />
@@ -224,6 +228,28 @@ function fresh(){ localStorage.removeItem(KEY); $("f").reset(); document.querySe
 $("nuevo").onclick=()=>{ if(confirm("¿Empezar una nueva acta? Se borrará el borrador actual.")) fresh(); };
 try{ const s=localStorage.getItem(KEY); if(s) restore(JSON.parse(s)); }catch{}
 if(!$("fecha").value) $("fecha").value=today();
+
+
+/* ---------- Dictado por voz ---------- */
+(function(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition, btn=$("btnMic"), msg=$("micMsg"), ta=$("observaciones");
+  if(!SR){ btn.disabled=true; msg.textContent="Tu navegador no admite dictado por voz (usa Chrome o Safari)."; return; }
+  let rec=null, on=false, base="", finalTxt="";
+  const join=(a,b)=>{ if(!b) return a; if(!a) return b; return /[\s\n]$/.test(a)?a+b:a+" "+b; };
+  const cap=t=>t.replace(/^\s*([a-záéíóúñ])/,(m,c)=>m.replace(c,c.toUpperCase()));
+  function start(){
+    rec=new SR(); rec.lang="es-ES"; rec.continuous=true; rec.interimResults=true;
+    base=ta.value; finalTxt="";
+    rec.onresult=e=>{ let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const t=e.results[i][0].transcript; if(e.results[i].isFinal) finalTxt=join(finalTxt,cap(t.trim())); else interim+=t; }
+      ta.value=join(base,join(finalTxt,interim.trim())); };
+    rec.onerror=e=>{ if(e.error==="not-allowed"||e.error==="service-not-allowed"){ msg.textContent="Permite el uso del micrófono en el navegador."; stop(true); } else if(e.error!=="no-speech"&&e.error!=="aborted"){ msg.textContent="Error de dictado: "+e.error; } };
+    rec.onend=()=>{ if(on){ // el navegador corta tras silencios: reanudar
+        base=ta.value; finalTxt=""; try{rec.start()}catch{ stop(); } } };
+    try{ rec.start(); on=true; btn.classList.add("on"); btn.textContent="⏹ Parar"; msg.textContent="Escuchando… habla con normalidad."; }catch{ msg.textContent="No se pudo iniciar el micrófono."; }
+  }
+  function stop(silent){ on=false; try{rec&&rec.stop()}catch{} btn.classList.remove("on"); btn.textContent="🎤 Dictar"; if(!silent) msg.textContent="Dictado detenido. Puedes editar el texto."; save(); }
+  btn.onclick=()=>on?stop():start();
+})();
 
 /* ---------- Validación ---------- */
 function validate(){
