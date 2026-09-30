@@ -165,7 +165,7 @@ const fmtDate = iso => iso ? iso.split("-").reverse().join("/") : "";
 
 /* ---------- Construcción del formulario ---------- */
 $("actuaciones").innerHTML = ACTUACIONES.map((t,i)=>`<label class="chk"><input type="checkbox" data-grp="act" data-i="${i}"><span>${esc(t)}</span></label>`).join("")
-  + `<label class="chk other"><input type="checkbox" id="actOtraChk"><input type="text" id="actOtraTxt" placeholder="Otra actuación (especificar)"></label>`;
+  + ["","2","3"].map(n=>`<label class="chk other"><input type="checkbox" id="actOtraChk${n}"><input type="text" id="actOtraTxt${n}" placeholder="Otra actuación (especificar)"></label>`).join("");
 $("formacion").innerHTML = FORMACION.map((t,i)=>`<label class="chk"><input type="checkbox" data-grp="for" data-i="${i}"><span>${esc(t)}</span></label>`).join("");
 $("recordatorios").innerHTML = RECORDATORIOS.map(t=>`<li>${esc(t)}</li>`).join("");
 $("sigs").innerHTML = FIRMAS.map(([k,l])=>`<div class="sig"><div class="hd"><span>${l}</span><button type="button" data-clear="${k}">Borrar</button></div><canvas id="sig_${k}"></canvas><input type="text" id="nom_${k}" placeholder="Nombre (opcional)"></div>`).join("");
@@ -201,11 +201,11 @@ function compress(file,max=1100,q=.72){ return new Promise((res,rej)=>{ const ur
   im.onerror=rej; im.src=url; }); }
 
 /* ---------- Estado (borrador automático) ---------- */
-const TEXT_IDS=["empresa","centro","ntrab","fecha","asistentes","observaciones","hentrada","hsalida","email","actOtraTxt","nom_previjob","nom_empresa","nom_delegado"];
+const TEXT_IDS=["empresa","centro","ntrab","fecha","asistentes","observaciones","hentrada","hsalida","email","actOtraTxt","actOtraTxt2","actOtraTxt3","nom_previjob","nom_empresa","nom_delegado"];
 function collect(){
   const d={}; TEXT_IDS.forEach(i=>d[i]=$(i).value);
   d.act=[...document.querySelectorAll('[data-grp="act"]')].map(x=>x.checked);
-  d.actOtra=$("actOtraChk").checked;
+  d.actOtra=$("actOtraChk").checked; d.actOtra2=$("actOtraChk2").checked; d.actOtra3=$("actOtraChk3").checked;
   d.for=[...document.querySelectorAll('[data-grp="for"]')].map(x=>x.checked);
   d.sig={}; FIRMAS.forEach(([k])=>d.sig[k]=pads[k].empty?null:pads[k].c.toDataURL("image/png"));
   d.fotos=fotos; return d;
@@ -214,14 +214,14 @@ function save(){ try{localStorage.setItem(KEY,JSON.stringify(collect()));$("stat
 function restore(d){
   TEXT_IDS.forEach(i=>{ if(d[i]!=null) $(i).value=d[i]; });
   document.querySelectorAll('[data-grp="act"]').forEach((x,i)=>x.checked=!!(d.act&&d.act[i]));
-  $("actOtraChk").checked=!!d.actOtra;
+  $("actOtraChk").checked=!!d.actOtra; $("actOtraChk2").checked=!!d.actOtra2; $("actOtraChk3").checked=!!d.actOtra3;
   document.querySelectorAll('[data-grp="for"]').forEach((x,i)=>x.checked=!!(d.for&&d.for[i]));
   fotos=d.fotos||[]; renderFotos();
   FIRMAS.forEach(([k])=>{pads[k].clear(); if(d.sig&&d.sig[k]) pads[k].load(d.sig[k]);});
 }
 let st; $("f").addEventListener("input",()=>{clearTimeout(st);st=setTimeout(save,400)});
 $("f").addEventListener("change",save);
-$("actOtraTxt").addEventListener("input",()=>{if($("actOtraTxt").value)$("actOtraChk").checked=true});
+["","2","3"].forEach(n=>$("actOtraTxt"+n).addEventListener("input",()=>{if($("actOtraTxt"+n).value)$("actOtraChk"+n).checked=true}));
 document.querySelectorAll("[data-now]").forEach(b=>b.onclick=()=>{const n=new Date();$(b.dataset.now).value=String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0");save()});
 
 function fresh(){ localStorage.removeItem(KEY); $("f").reset(); document.querySelectorAll("input[type=checkbox]").forEach(x=>x.checked=false); fotos=[];renderFotos(); Object.values(pads).forEach(p=>{p.clear()}); localStorage.removeItem(KEY); $("fecha").value=today(); $("status").textContent=""; }
@@ -334,11 +334,11 @@ async function makePdf(d){
   band("ACTUACIONES TÉCNICAS REALIZADAS POR PREVIJOB","en la fecha indicada (se relacionan las acciones realizadas en la presente visita / en visitas anteriores pueden haberse realizado otras acciones)",8.5);
   y+=1.5;
   const colW=(W-4)/2;
-  const otraTxt=d.actOtra&&d.actOtraTxt?d.actOtraTxt:"";
-  const left=[0,2,4,6].map(i=>[ACTUACIONES[i],d.act[i]]);
-  const right=[1,3,5].map(i=>[ACTUACIONES[i],d.act[i]]); right.push([otraTxt,d.actOtra]);
-  for(let i=0;i<4;i++){
-    const h=Math.max(itemH(left[i][0],colW),itemH(right[i][0]||" ",colW));
+  const ot=(on,t)=>[on&&t?t:"",on];
+  const left=[0,2,4,6].map(i=>[ACTUACIONES[i],d.act[i]]); left.push(ot(d.actOtra2,d.actOtraTxt2));
+  const right=[1,3,5].map(i=>[ACTUACIONES[i],d.act[i]]); right.push(ot(d.actOtra,d.actOtraTxt)); right.push(ot(d.actOtra3,d.actOtraTxt3));
+  for(let i=0;i<5;i++){
+    const h=Math.max(itemH(left[i][0]||" ",colW),itemH(right[i][0]||" ",colW));
     need(h);
     drawItem(M,y,colW,left[i][0],left[i][1]); drawItem(M+colW+4,y,colW,right[i][0],right[i][1]);
     y+=h;
