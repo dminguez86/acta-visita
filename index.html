@@ -63,7 +63,6 @@ button.danger{color:var(--red)}
 .bar .grp{display:flex;gap:.5rem;flex-wrap:wrap}
 #status{font-size:.75rem;color:var(--g500)}
 #toast{position:fixed;left:50%;bottom:5.5rem;transform:translateX(-50%);background:#111;color:#fff;padding:.7rem 1.1rem;border-radius:10px;font-size:.9rem;max-width:90vw;display:none;z-index:20;text-align:center}
-#pdfhost{position:absolute;left:0;top:0;width:794px;background:#fff;z-index:-1;pointer-events:none}
 </style>
 </head>
 <body>
@@ -122,9 +121,8 @@ button.danger{color:var(--red)}
   </div>
 </div></div>
 <div id="toast"></div>
-<div id="pdfhost"></div>
 
-<script src="html2pdf.bundle.min.js"></script>
+<script src="jspdf.umd.min.js"></script>
 <script>
 "use strict";
 /* ---------- Contenido del acta (fiel al documento original) ---------- */
@@ -235,57 +233,148 @@ function validate(){
   return true;
 }
 
-/* ---------- PDF ---------- */
-function buildPdfHtml(d){
-  const chk=(on,t)=>`<div style="display:flex;gap:6px;margin:3px 0;font-size:10.5px;line-height:1.3"><div style="flex:0 0 12px;height:12px;border:1.2px solid #111;text-align:center;font-size:11px;line-height:11px;font-weight:700">${on?"✕":""}</div><div>${t}</div></div>`;
-  const band=(t,sub)=>`<div style="background:#0d0d0d;color:#fff;padding:4px 8px;font-size:10px;font-weight:700;${/OBSERV/.test(t)?"font-style:italic;font-size:11px;":""}margin-top:8px">${t}${sub?`<span style="font-weight:400"> ${sub}</span>`:""}</div>`;
-  const act=ACTUACIONES.map((t,i)=>chk(d.act[i],esc(t)));
-  act.push(chk(d.actOtra, d.actOtra&&d.actOtraTxt?esc(d.actOtraTxt):"&nbsp;"));
-  // orden original: izquierda 1,3,5,7 · derecha 2,4,6,otra
-  const L=[0,2,4,6].map(i=>act[i]).join(""), R=[1,3,5,7].map(i=>act[i]).join("");
-  const sig=k=>d.sig[k]?`<img src="${d.sig[k]}" style="max-height:62px;max-width:100%">`:"";
-  const nom=k=>d["nom_"+k]?`<div style="font-size:9px;margin-top:2px">${esc(d["nom_"+k])}</div>`:"";
-  const fotosHtml=d.fotos.length?`<div class="brk" style="page-break-before:always;break-before:page">${band("FOTOGRAFÍAS")}<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">${d.fotos.map(f=>`<div style="width:48%;page-break-inside:avoid"><img src="${f}" style="width:100%;border:1px solid #999"></div>`).join("")}</div></div>`:"";
-  const td="border:1px solid #111;padding:4px 6px;font-size:10.5px;vertical-align:top";
-  return `<div style="font-family:Arial,Helvetica,sans-serif;color:#111;width:754px;padding:0">
-  <table style="width:100%;border-collapse:collapse;margin-bottom:6px"><tr>
-    <td style="vertical-align:middle"><div style="font-size:26px;font-weight:800;letter-spacing:.5px">ACTA DE VISITA</div><div style="font-size:10px;margin-top:2px">www.previjob.com &nbsp;·&nbsp; 977 22 98 95</div></td>
-    <td style="text-align:right;width:250px"><div style="background:#000;display:inline-block;padding:6px 10px;border-radius:4px"><img src="logo-previjob.png" style="height:48px;display:block"></div></td></tr></table>
-  <table style="width:100%;border-collapse:collapse">
-    <tr><td style="${td};width:64%"><b>Empresa:</b> ${esc(d.empresa)}<br><div style="margin-top:4px"><b>Centro de trabajo:</b> ${esc(d.centro)}</div></td>
-        <td style="${td};width:18%"><b>Nº trab:</b> ${esc(d.ntrab)}</td>
-        <td style="${td};width:18%"><b>Pág.</b> <span class="pgph">&nbsp;</span></td></tr>
-    <tr><td style="${td}" ><b>Asistentes:</b> ${esc(d.asistentes).replace(/\n/g,"<br>")}</td><td style="${td}" colspan="2"><b>Fecha:</b> ${fmtDate(d.fecha)}</td></tr>
-  </table>
-  ${band("ACTUACIONES TÉCNICAS REALIZADAS POR PREVIJOB","en la fecha indicada (se relacionan las acciones realizadas en la presente visita / en visitas anteriores pueden haberse realizado otras acciones)")}
-  <table style="width:100%;border-collapse:collapse;margin-top:4px"><tr><td style="width:50%;vertical-align:top;padding-right:8px">${L}</td><td style="width:50%;vertical-align:top">${R}</td></tr></table>
-  <div style="font-weight:700;font-size:11px;margin-top:8px;text-decoration:underline">Formación anual:</div>
-  ${FORMACION.map((t,i)=>chk(d.for[i],esc(t))).join("")}
-  ${band("OBSERVACIONES:")}
-  <div style="border:1px solid #111;border-top:0;min-height:170px;padding:6px 8px;font-size:11px;white-space:pre-wrap">${esc(d.observaciones)}</div>
-  <div style="page-break-inside:avoid;break-inside:avoid">
-  ${band("RECORDATORIOS PARA LA EMPRESA:")}
-  <ul style="margin:5px 0 0;padding-left:16px;font-size:9.3px;line-height:1.3">${RECORDATORIOS.map(t=>`<li style="margin-bottom:3px">${esc(t).replace("www.previjob.com","<b>www.previjob.com</b>")}</li>`).join("")}</ul>
-  <table style="width:100%;border-collapse:collapse;margin-top:8px;table-layout:fixed">
-    <tr style="background:#0d0d0d;color:#fff;font-size:9.5px;font-weight:700"><td style="border:1px solid #111;padding:3px 5px">PREVIJOB</td><td style="border:1px solid #111;padding:3px 5px">RESPONSABLE EMPRESA</td><td style="border:1px solid #111;padding:3px 5px">DELEGADO DE PREVENCIÓN</td><td style="border:1px solid #111;padding:3px 5px">HORA DE ENTRADA:</td></tr>
-    <tr><td rowspan="3" style="border:1px solid #111;height:88px;padding:4px;text-align:center;vertical-align:middle">${sig("previjob")}${nom("previjob")}</td><td rowspan="3" style="border:1px solid #111;padding:4px;text-align:center;vertical-align:middle">${sig("empresa")}${nom("empresa")}</td><td rowspan="3" style="border:1px solid #111;padding:4px;text-align:center;vertical-align:middle">${sig("delegado")}${nom("delegado")}</td>
-      <td style="border:1px solid #111;padding:4px;font-size:12px;font-weight:700;text-align:center;height:26px">${esc(d.hentrada)}</td></tr>
-    <tr style="background:#0d0d0d;color:#fff;font-size:9.5px;font-weight:700"><td style="border:1px solid #111;padding:3px 5px">HORA DE SALIDA:</td></tr>
-    <tr><td style="border:1px solid #111;padding:4px;font-size:12px;font-weight:700;text-align:center;height:26px">${esc(d.hsalida)}</td></tr>
-  </table></div>
-  ${fotosHtml}
-  </div>`;
-}
+/* ---------- PDF (dibujado directo con jsPDF: sin depender de la pantalla) ---------- */
 function fileName(d){ const e=(d.empresa||"empresa").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40); return `acta-visita-${e}-${d.fecha||"sin-fecha"}.pdf`; }
+const clean = s => String(s??"").replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/[\u2013\u2014]/g,"-").replace(/\u2026/g,"...").replace(/[^\n\x20-\xFF]/g,"");
+function loadImg(src){ return new Promise(res=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>res(null); im.src=src; }); }
 async function makePdf(d){
-  if(typeof html2pdf==="undefined") throw new Error("No se pudo cargar la biblioteca PDF.");
-  const host=$("pdfhost"); host.innerHTML=buildPdfHtml(d); const sy=window.scrollY; window.scrollTo(0,0); await new Promise(r=>setTimeout(r,300)); await Promise.all([...host.querySelectorAll('img')].map(im=>im.complete?1:new Promise(r=>{im.onload=im.onerror=r})));
-  const opt={margin:[10,10,14,10],filename:fileName(d),image:{type:"jpeg",quality:.95},html2canvas:{scale:2,useCORS:true,backgroundColor:"#fff",scrollX:0,scrollY:0,windowWidth:794},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"],avoid:["li","tr"]}};
-  const blob=await html2pdf().set(opt).from(host.firstElementChild).toPdf().get("pdf").then(pdf=>{
-    const n=pdf.internal.getNumberOfPages(), w=pdf.internal.pageSize.getWidth(), h=pdf.internal.pageSize.getHeight();
-    for(let i=1;i<=n;i++){ pdf.setPage(i); pdf.setFontSize(8); pdf.setTextColor(90); pdf.text(`Pág. ${i} de ${n}`,w-10,h-6,{align:"right"}); pdf.text("PREVIJOB Servicio de Prevención · www.previjob.com · 977 22 98 95",10,h-6); }
-    return pdf.output("blob"); });
-  host.innerHTML=""; window.scrollTo(0,sy); return {blob,name:opt.filename};
+  const lib=window.jspdf; if(!lib) throw new Error("No se pudo cargar la biblioteca PDF.");
+  const doc=new lib.jsPDF({unit:"mm",format:"a4",orientation:"portrait"});
+  const PW=210, PH=297, M=12, W=PW-2*M, BOTTOM=PH-16;
+  let y=M;
+  const logo=await loadImg("logo-previjob.png");
+  const sigImgs={}; for(const [k] of FIRMAS){ sigImgs[k]= d.sig[k]? await loadImg(d.sig[k]) : null; }
+  const fotoImgs=[]; for(const f of d.fotos){ const im=await loadImg(f); if(im) fotoImgs.push({src:f,im}); }
+
+  const LH=(pt)=>pt*0.3528*1.28;
+  const setF=(pt,style="normal")=>{doc.setFont("helvetica",style);doc.setFontSize(pt)};
+  const lines=(t,w,pt,style="normal")=>{setF(pt,style);return doc.splitTextToSize(clean(t),w)};
+  const need=(h)=>{ if(y+h>BOTTOM){ doc.addPage(); y=M; return true;} return false; };
+  const box=(x,yy,w,h)=>{doc.setDrawColor(17);doc.setLineWidth(.25);doc.rect(x,yy,w,h)};
+  function band(text,sub,pt=8.5,italic=false){
+    const t=clean(text), s2=sub?" "+clean(sub):"";
+    setF(pt,italic?"bolditalic":"bold"); const w1=doc.getTextWidth(t);
+    const full=doc.splitTextToSize(t+s2,W-4); const h=full.length*LH(pt)+2.4;
+    need(h+8); doc.setFillColor(13,13,13); doc.rect(M,y,W,h,"F"); doc.setTextColor(255);
+    if(sub){ // título en negrita + resto normal en la 1ª línea
+      setF(pt,"bold"); doc.text(t,M+2,y+1.2+LH(pt)*0.78);
+      setF(pt-1.5,"normal"); const rest=doc.splitTextToSize(s2.trim(),W-6-w1); 
+      // si no cabe en la 1ª línea, continúa debajo
+      const first=rest[0]||""; doc.text(first,M+2+w1+1.5,y+1.2+LH(pt)*0.78);
+    } else { setF(pt,italic?"bolditalic":"bold"); doc.text(full,M+2,y+1.2+LH(pt)*0.78); }
+    doc.setTextColor(17); y+=h; return h;
+  }
+  function checkbox(x,yy,on){ const s=3.4; doc.setDrawColor(17);doc.setLineWidth(.3);doc.rect(x,yy,s,s); if(on){doc.setLineWidth(.5);doc.line(x+.6,yy+.6,x+s-.6,yy+s-.6);doc.line(x+s-.6,yy+.6,x+.6,yy+s-.6);} }
+  const ITEM_PT=8.6;
+  function itemH(t,w){ return Math.max(4.4, lines(t,w-6,ITEM_PT).length*LH(ITEM_PT)+1.2); }
+  function drawItem(x,yy,w,t,on){ checkbox(x,yy+.3,on); setF(ITEM_PT); doc.setTextColor(17); doc.text(lines(t,w-6,ITEM_PT),x+5,yy+.3+LH(ITEM_PT)*0.72); }
+
+  /* Cabecera */
+  setF(22,"bold"); doc.setTextColor(17); doc.text("ACTA DE VISITA",M,y+8);
+  setF(8.5); doc.text("www.previjob.com   |   977 22 98 95",M,y+13.5);
+  if(logo){ const lh=14, lw=lh*logo.width/logo.height; doc.setFillColor(0,0,0); doc.rect(PW-M-lw-4,y-1,lw+4,lh+2,"F"); doc.addImage(logo,"PNG",PW-M-lw-2,y,lw,lh); }
+  y+=19;
+
+  /* Datos generales */
+  const c1=W*0.62, c2=W*0.19, c3=W-c1-c2;
+  const emp=lines("Empresa: "+d.empresa,c1-4,9), cen=lines("Centro de trabajo: "+d.centro,c1-4,9);
+  const r1=Math.max(9, (emp.length+cen.length)*LH(9)+3);
+  box(M,y,c1,r1); box(M+c1,y,c2,r1); box(M+c1+c2,y,c3,r1);
+  setF(9,"bold"); 
+  const drawLabeled=(x,yy,label,val,wid,pt=9)=>{ setF(pt,"bold"); doc.text(label,x,yy); const lw=doc.getTextWidth(label+" "); setF(pt); const ls=doc.splitTextToSize(clean(val),wid-lw); doc.text(ls[0]||"",x+lw,yy); if(ls.length>1) doc.text(ls.slice(1),x,yy+LH(pt)); return Math.max(1,ls.length)*LH(pt); };
+  let yy=y+LH(9)*0.85+.6; yy+=drawLabeled(M+2,yy,"Empresa:",d.empresa,c1-4)+.6; drawLabeled(M+2,yy,"Centro de trabajo:",d.centro,c1-4);
+  drawLabeled(M+c1+2,y+LH(9)*0.85+.6,"Nº trab:",d.ntrab,c2-4);
+  setF(9,"bold"); doc.text("Pág.",M+c1+c2+2,y+LH(9)*0.85+.6); doc._pagRef={x:M+c1+c2+2+doc.getTextWidth("Pág. "),y:y+LH(9)*0.85+.6};
+  y+=r1;
+  const as=lines("Asistentes: "+d.asistentes,c1-4,9); const r2=Math.max(9,as.length*LH(9)+3);
+  box(M,y,c1,r2); box(M+c1,y,c2+c3,r2);
+  drawLabeled(M+2,y+LH(9)*0.85+.6,"Asistentes:",d.asistentes,c1-4);
+  drawLabeled(M+c1+2,y+LH(9)*0.85+.6,"Fecha:",fmtDate(d.fecha),c2+c3-4);
+  y+=r2+3;
+
+  /* Actuaciones */
+  band("ACTUACIONES TÉCNICAS REALIZADAS POR PREVIJOB","en la fecha indicada (se relacionan las acciones realizadas en la presente visita / en visitas anteriores pueden haberse realizado otras acciones)",8.5);
+  y+=1.5;
+  const colW=(W-4)/2;
+  const otraTxt=d.actOtra&&d.actOtraTxt?d.actOtraTxt:"";
+  const left=[0,2,4,6].map(i=>[ACTUACIONES[i],d.act[i]]);
+  const right=[1,3,5].map(i=>[ACTUACIONES[i],d.act[i]]); right.push([otraTxt,d.actOtra]);
+  for(let i=0;i<4;i++){
+    const h=Math.max(itemH(left[i][0],colW),itemH(right[i][0]||" ",colW));
+    need(h);
+    drawItem(M,y,colW,left[i][0],left[i][1]); drawItem(M+colW+4,y,colW,right[i][0],right[i][1]);
+    y+=h;
+  }
+  y+=2;
+
+  /* Formación */
+  need(12); setF(9.5,"bold"); doc.text("Formación anual:",M,y+3); const uw=doc.getTextWidth("Formación anual:"); doc.setLineWidth(.3); doc.line(M,y+3.6,M+uw,y+3.6); y+=5.5;
+  FORMACION.forEach((t,i)=>{ const h=itemH(t,W); need(h); drawItem(M,y,W,t,d.for[i]); y+=h; });
+  y+=1.5;
+
+  /* Observaciones (puede ocupar varias páginas) */
+  band("OBSERVACIONES:",null,9.5,true);
+  {
+    const obs=clean(d.observaciones).split("\n").flatMap(p=>p===""?[""]:doc.splitTextToSize(p,W-4));
+    setF(9.5); const lh=LH(9.5), minH=42;
+    let segTop=y, i=0, used=0;
+    if(obs.length===0) obs.push("");
+    while(i<obs.length){
+      if(y+lh+2>BOTTOM){ box(M,segTop,W,y-segTop+1); doc.addPage(); y=M; segTop=y; }
+      setF(9.5); doc.setTextColor(17); doc.text(obs[i],M+2,y+lh*0.85+1); y+=lh; used+=lh; i++;
+    }
+    let h=y-segTop+2; const pad=Math.max(0,minH-(used+2)); 
+    // caja mínima solo si todo cupo en una página
+    if(segTop===y-used || true){ const extra=(y-segTop<minH && used<minH)?minH-(y-segTop):0; y+=extra; }
+    box(M,segTop,W,y-segTop+2); y+=5;
+  }
+
+  /* Recordatorios + firmas (juntos) */
+  const RP=7.6, remLines=RECORDATORIOS.map(t=>lines(t,W-6,RP));
+  const remH=remLines.reduce((a,l)=>a+l.length*LH(RP)+1.2,0);
+  const bandH=LH(8.5)+2.4, sigH=32;
+  if(y+bandH+remH+sigH+8>BOTTOM){ doc.addPage(); y=M; }
+  band("RECORDATORIOS PARA LA EMPRESA:",null,8.5);
+  y+=1.5;
+  remLines.forEach(l=>{ setF(RP); doc.setTextColor(17); doc.setFillColor(17,17,17); doc.circle(M+1.6,y+LH(RP)*0.5,0.5,"F"); doc.text(l,M+4,y+LH(RP)*0.78); y+=l.length*LH(RP)+1.2; });
+  y+=3;
+  // firmas y horas
+  const sw=W*0.245, tw=W-3*sw, hh=6, vh=10;
+  const heads=["PREVIJOB","RESPONSABLE EMPRESA","DELEGADO DE PREVENCIÓN"];
+  [0,1,2].forEach(i=>{ const x=M+i*sw; doc.setFillColor(13,13,13); doc.rect(x,y,sw,hh,"F"); box(x,y,sw,hh); doc.setTextColor(255); setF(7.6,"bold"); doc.text(heads[i],x+2,y+4.1); doc.setTextColor(17); box(x,y+hh,sw,sigH-hh); });
+  const tx=M+3*sw;
+  const th=(label,yy)=>{ doc.setFillColor(13,13,13); doc.rect(tx,yy,tw,hh,"F"); box(tx,yy,tw,hh); doc.setTextColor(255); setF(7.6,"bold"); doc.text(label,tx+2,yy+4.1); doc.setTextColor(17); };
+  const tv=(val,yy)=>{ box(tx,yy,tw,vh); setF(12,"bold"); doc.text(clean(val),tx+tw/2,yy+vh/2+1.6,{align:"center"}); };
+  th("HORA DE ENTRADA:",y); tv(d.hentrada,y+hh); th("HORA DE SALIDA:",y+hh+vh); tv(d.hsalida,y+2*hh+vh);
+  [["previjob",0],["empresa",1],["delegado",2]].forEach(([k,i])=>{
+    const x=M+i*sw, im=sigImgs[k], nm=clean(d["nom_"+k]); const ah=sigH-hh-(nm?4:0)-2, aw=sw-4;
+    if(im){ const sc=Math.min(aw/im.width,ah/im.height); const w=im.width*sc,h=im.height*sc; doc.addImage(im,"PNG",x+(sw-w)/2,y+hh+1+(ah-h)/2,w,h); }
+    if(nm){ setF(7.5); doc.text(doc.splitTextToSize(nm,sw-4)[0],x+sw/2,y+sigH-1.6,{align:"center"}); }
+  });
+  y+=sigH;
+
+  /* Fotos */
+  if(fotoImgs.length){
+    doc.addPage(); y=M; band("FOTOGRAFÍAS",null,9.5); y+=3;
+    const cw=(W-4)/2; let col=0, rowH=0;
+    for(const f of fotoImgs){
+      const sc=Math.min(cw/f.im.width,110/f.im.height), w=f.im.width*sc, h=f.im.height*sc;
+      if(col===0 && y+h>BOTTOM){ doc.addPage(); y=M; }
+      const x=M+col*(cw+4);
+      doc.addImage(f.src,"JPEG",x,y,w,h); doc.setDrawColor(150); doc.rect(x,y,w,h);
+      rowH=Math.max(rowH,h); col++;
+      if(col===2){ col=0; y+=rowH+4; rowH=0; }
+    }
+  }
+
+  /* Pie y numeración */
+  const n=doc.getNumberOfPages();
+  for(let i=1;i<=n;i++){ doc.setPage(i); setF(7.5); doc.setTextColor(90);
+    doc.text(`Pág. ${i} de ${n}`,PW-M,PH-8,{align:"right"});
+    doc.text("PREVIJOB Servicio de Prevención | www.previjob.com | 977 22 98 95",M,PH-8);
+    if(i===1&&doc._pagRef){ setF(9,"bold"); doc.setTextColor(17); doc.text(`${i} de ${n}`,doc._pagRef.x,doc._pagRef.y); } }
+  const blob=doc.output("blob");
+  return {blob,name:fileName(d)};
 }
 function download(blob,name){ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); }
 async function busy(btn,fn){ const t=btn.textContent; btn.disabled=true; btn.textContent="Generando…"; try{ await fn(); }catch(e){ console.error(e); toast("Error: "+(e.message||e),6000); } finally{ btn.disabled=false; btn.textContent=t; } }
