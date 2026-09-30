@@ -234,19 +234,31 @@ if(!$("fecha").value) $("fecha").value=today();
 (function(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition, btn=$("btnMic"), msg=$("micMsg"), ta=$("observaciones");
   if(!SR){ btn.disabled=true; msg.textContent="Tu navegador no admite dictado por voz (usa Chrome o Safari)."; return; }
-  let rec=null, on=false, base="", finalTxt="";
+  const isAndroid=/Android/i.test(navigator.userAgent);
+  let rec=null, on=false, lastAdded="", restarts=0;
   const join=(a,b)=>{ if(!b) return a; if(!a) return b; return /[\s\n]$/.test(a)?a+b:a+" "+b; };
-  const cap=t=>t.replace(/^\s*([a-záéíóúñ])/,(m,c)=>m.replace(c,c.toUpperCase()));
-  function start(){
-    rec=new SR(); rec.lang="es-ES"; rec.continuous=true; rec.interimResults=true;
-    base=ta.value; finalTxt="";
-    rec.onresult=e=>{ let interim=""; for(let i=e.resultIndex;i<e.results.length;i++){ const t=e.results[i][0].transcript; if(e.results[i].isFinal) finalTxt=join(finalTxt,cap(t.trim())); else interim+=t; }
-      ta.value=join(base,join(finalTxt,interim.trim())); };
-    rec.onerror=e=>{ if(e.error==="not-allowed"||e.error==="service-not-allowed"){ msg.textContent="Permite el uso del micrófono en el navegador."; stop(true); } else if(e.error!=="no-speech"&&e.error!=="aborted"){ msg.textContent="Error de dictado: "+e.error; } };
-    rec.onend=()=>{ if(on){ // el navegador corta tras silencios: reanudar
-        base=ta.value; finalTxt=""; try{rec.start()}catch{ stop(); } } };
-    try{ rec.start(); on=true; btn.classList.add("on"); btn.textContent="⏹ Parar"; msg.textContent="Escuchando… habla con normalidad."; }catch{ msg.textContent="No se pudo iniciar el micrófono."; }
+  const cap=t=>t.replace(/^\s*([a-záéíóúñ])/i,(m,c)=>m.replace(c,c.toUpperCase()));
+  const norm=t=>t.toLowerCase().replace(/[.,;:¿?¡!]/g,"").replace(/\s+/g," ").trim();
+  function addFinal(t){
+    t=t.trim(); if(!t) return;
+    // evitar repeticiones: mismo texto que la última frase, o ya presente al final del campo
+    if(norm(t)===norm(lastAdded)) return;
+    const cur=norm(ta.value); if(cur.endsWith(norm(t)) && norm(t).split(" ").length>2) return;
+    lastAdded=t;
+    const need=/[.!?]\s*$/.test(ta.value)||ta.value.trim()===""; 
+    ta.value=join(ta.value,need?cap(t):t);
+    ta.scrollTop=ta.scrollHeight; save();
   }
+  function newRec(){
+    const r=new SR(); r.lang="es-ES"; r.continuous=false; r.interimResults=false; r.maxAlternatives=1;
+    r.onresult=e=>{ for(let i=e.resultIndex;i<e.results.length;i++){ if(e.results[i].isFinal) addFinal(e.results[i][0].transcript); } };
+    r.onerror=e=>{ if(e.error==="not-allowed"||e.error==="service-not-allowed"){ msg.textContent="Permite el uso del micrófono en el navegador."; stop(true); }
+      else if(e.error==="network"){ msg.textContent="Sin conexión para el dictado."; stop(true); }
+      else if(e.error!=="no-speech"&&e.error!=="aborted"){ msg.textContent="Error de dictado: "+e.error; } };
+    r.onend=()=>{ if(on){ setTimeout(()=>{ if(!on) return; try{ rec=newRec(); rec.start(); }catch{ stop(); } }, isAndroid?350:150); } };
+    return r;
+  }
+  function start(){ lastAdded=""; try{ rec=newRec(); rec.start(); on=true; btn.classList.add("on"); btn.textContent="⏹ Parar"; msg.textContent="Escuchando… habla y haz una pausa al terminar cada frase."; }catch{ msg.textContent="No se pudo iniciar el micrófono."; } }
   function stop(silent){ on=false; try{rec&&rec.stop()}catch{} btn.classList.remove("on"); btn.textContent="🎤 Dictar"; if(!silent) msg.textContent="Dictado detenido. Puedes editar el texto."; save(); }
   btn.onclick=()=>on?stop():start();
 })();
