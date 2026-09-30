@@ -110,9 +110,7 @@ button.mic.on{background:var(--red);color:#fff;border-color:var(--red);animation
     <div class="timef"><label class="f">Hora de entrada<input type="time" id="hentrada" /></label><button type="button" data-now="hentrada">Ahora</button></div>
     <div class="timef"><label class="f">Hora de salida<input type="time" id="hsalida" /></label><button type="button" data-now="hsalida">Ahora</button></div>
   </div>
-  <div class="sub">Envío</div>
-  <label class="f">Correo de destino (opcional)<input type="email" id="email" placeholder="correo@empresa.com" /></label>
-</div></section>
+  </div></section>
 
 </form>
 </main>
@@ -120,8 +118,7 @@ button.mic.on{background:var(--red);color:#fff;border-color:var(--red);animation
 <div class="bar"><div class="wrap">
   <div><button type="button" class="danger" id="nuevo">Nueva acta</button> <span id="status"></span></div>
   <div class="grp">
-    <button type="button" id="btnPdf">Descargar PDF</button>
-    <button type="button" class="primary" id="btnSend">Enviar acta</button>
+    <button type="button" class="primary" id="btnPdf">Descargar PDF</button>
   </div>
 </div></div>
 <div id="toast"></div>
@@ -201,7 +198,7 @@ function compress(file,max=1100,q=.72){ return new Promise((res,rej)=>{ const ur
   im.onerror=rej; im.src=url; }); }
 
 /* ---------- Estado (borrador automático) ---------- */
-const TEXT_IDS=["empresa","centro","ntrab","fecha","asistentes","observaciones","hentrada","hsalida","email","actOtraTxt","actOtraTxt2","actOtraTxt3","nom_previjob","nom_empresa","nom_delegado"];
+const TEXT_IDS=["empresa","centro","ntrab","fecha","asistentes","observaciones","hentrada","hsalida","actOtraTxt","actOtraTxt2","actOtraTxt3","nom_previjob","nom_empresa","nom_delegado"];
 function collect(){
   const d={}; TEXT_IDS.forEach(i=>d[i]=$(i).value);
   d.act=[...document.querySelectorAll('[data-grp="act"]')].map(x=>x.checked);
@@ -267,7 +264,6 @@ if(!$("fecha").value) $("fecha").value=today();
 function validate(){
   let ok=true; ["empresa","fecha"].forEach(i=>{const e=$(i); const bad=!e.value.trim(); e.classList.toggle("invalid",bad); if(bad)ok=false;});
   if(!ok){ toast("Completa los campos obligatorios: empresa y fecha."); $("empresa").value.trim()?$("fecha").focus():$("empresa").focus(); return false; }
-  if($("email").value && !$("email").checkValidity()){ toast("El correo de destino no es válido."); $("email").focus(); return false; }
   return true;
 }
 
@@ -418,15 +414,6 @@ function download(blob,name){ const a=document.createElement("a"); a.href=URL.cr
 async function busy(btn,fn){ const t=btn.textContent; btn.disabled=true; btn.textContent="Generando…"; try{ await fn(); }catch(e){ console.error(e); toast("Error: "+(e.message||e),6000); } finally{ btn.disabled=false; btn.textContent=t; } }
 
 $("btnPdf").onclick=()=>{ if(!validate())return; busy($("btnPdf"),async()=>{ const {blob,name}=await makePdf(collect()); download(blob,name); toast("PDF descargado"); }); };
-$("btnSend").onclick=()=>{ if(!validate())return; busy($("btnSend"),async()=>{
-  const d=collect(), {blob,name}=await makePdf(d); download(blob,name);
-  const file=new File([blob],name,{type:"application/pdf"});
-  const asunto=`Acta de visita PREVIJOB – ${d.empresa} – ${fmtDate(d.fecha)}`;
-  const cuerpo=`Buenos días,\n\nAdjuntamos el acta de la visita realizada el ${fmtDate(d.fecha)} en ${d.empresa}${d.centro?" ("+d.centro+")":""}.\n\nUn saludo,\nPREVIJOB Servicio de Prevención\nwww.previjob.com · 977 22 98 95`;
-  if(navigator.canShare && navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title:asunto,text:cuerpo}); toast("Acta compartida"); return; }catch(e){ if(e.name==="AbortError"){return;} } }
-  location.href=`mailto:${encodeURIComponent(d.email||"")}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo+"\n\n(Adjunta el PDF descargado: "+name+")")}`;
-  toast("PDF descargado. Adjúntalo al correo que se ha abierto.",6000);
-}); };
 </script>
 </body>
 </html>
