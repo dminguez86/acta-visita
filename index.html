@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0d0d0d" />
+<title>Acta de visita · PREVIJOB</title>
+<style>
+:root{--cyan:#4ba3c7;--green:#7ac143;--dark:#0d0d0d;--g900:#1a1d23;--g700:#3d4450;--g500:#6b7280;--g300:#d1d5db;--g200:#e5e7eb;--g100:#f3f4f6;--red:#b91c1c;--r:10px;--font:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;font-family:var(--font);font-size:16px;line-height:1.5;color:var(--g900);background:linear-gradient(125deg,#f8fcfd,#eaf7fb 52%,#f0f8e9) fixed;-webkit-font-smoothing:antialiased}
+header{background:linear-gradient(135deg,#0d0d0d,#1a1a1a);color:#fff;padding:1rem;border-bottom:3px solid var(--green)}
+.wrap{max-width:860px;margin:0 auto}
+header img{display:block;max-height:58px;margin-bottom:.6rem}
+header h1{margin:0;font-size:1.45rem}
+header p{margin:.15rem 0 0;font-size:.85rem;opacity:.85}
+main{max-width:860px;margin:0 auto;padding:1rem 1rem 6rem}
+section{background:#fff;border-radius:var(--r);box-shadow:0 1px 3px rgba(0,0,0,.08),0 6px 18px rgba(36,125,157,.1);margin-bottom:1rem;overflow:hidden}
+section>h2{margin:0;background:var(--dark);color:#fff;font-size:.82rem;letter-spacing:.03em;text-transform:uppercase;padding:.6rem 1rem;border-left:5px solid var(--green);font-weight:700}
+section>h2 small{display:block;text-transform:none;font-weight:400;opacity:.8;letter-spacing:0;font-size:.75rem;margin-top:.1rem}
+.body{padding:1rem}
+.grid{display:grid;gap:.8rem;grid-template-columns:1fr 1fr}
+.grid .full{grid-column:1/-1}
+@media(max-width:620px){.grid{grid-template-columns:1fr}}
+label.f{display:block;font-size:.8rem;font-weight:600;color:var(--g700)}
+label.f span.req{color:var(--red)}
+input[type=text],input[type=number],input[type=date],input[type=time],input[type=email],textarea{width:100%;margin-top:.2rem;padding:.6rem .7rem;min-height:44px;font:inherit;border:1px solid var(--g300);border-radius:8px;background:#fff;color:var(--g900)}
+textarea{resize:vertical;min-height:90px}
+input:focus,textarea:focus{outline:2px solid var(--cyan);border-color:var(--cyan)}
+.invalid{border-color:var(--red)!important;background:#fff5f5}
+.chk{display:flex;gap:.65rem;align-items:flex-start;padding:.6rem .7rem;border:1px solid var(--g200);border-radius:8px;cursor:pointer;min-height:44px;background:#fafcfd;font-size:.92rem}
+.chk input{width:22px;height:22px;flex:0 0 22px;margin:1px 0 0;accent-color:var(--green)}
+.chk:has(input:checked){background:#eef8e6;border-color:var(--green)}
+.chk.other{flex-wrap:wrap}
+.chk.other input[type=text]{flex:1 1 200px;margin:0;min-height:36px;padding:.35rem .6rem}
+.list{display:grid;gap:.5rem}
+.list.two{grid-template-columns:1fr 1fr}
+@media(max-width:700px){.list.two{grid-template-columns:1fr}}
+.sub{font-size:.8rem;font-weight:700;color:var(--g700);margin:.9rem 0 .4rem;text-transform:uppercase}
+.sub:first-child{margin-top:0}
+.rem li{margin-bottom:.45rem;font-size:.86rem;color:var(--g700)}
+.rem{margin:0;padding-left:1.1rem}
+.sigs{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
+@media(max-width:700px){.sigs{grid-template-columns:1fr}}
+.sig canvas{width:100%;height:150px;border:1px dashed var(--g500);border-radius:8px;background:#fff;touch-action:none;display:block}
+.sig .hd{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;font-weight:700;margin-bottom:.3rem}
+.sig button{font-size:.75rem;padding:.25rem .6rem;min-height:30px}
+.sig input{margin-top:.4rem}
+.times{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.timef{display:flex;gap:.4rem;align-items:flex-end}
+.timef label{flex:1}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--g300);background:#fff;padding:.5rem .9rem;min-height:44px;font-weight:600;color:var(--g900)}
+button:hover{background:var(--g100)}
+button.primary{background:var(--dark);color:#fff;border-color:var(--dark);border-bottom:3px solid var(--green)}
+button.primary:hover{background:#222}
+button.danger{color:var(--red)}
+.photos{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.6rem}
+.photos .ph{position:relative;width:110px;height:110px;border-radius:8px;overflow:hidden;border:1px solid var(--g300)}
+.photos img{width:100%;height:100%;object-fit:cover}
+.photos .ph button{position:absolute;top:2px;right:2px;min-height:26px;padding:0 .45rem;background:rgba(0,0,0,.65);color:#fff;border:0}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:3px solid var(--green);box-shadow:0 -4px 16px rgba(0,0,0,.12);padding:.6rem 1rem calc(.6rem + env(safe-area-inset-bottom));z-index:10}
+.bar .wrap{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:space-between;align-items:center}
+.bar .grp{display:flex;gap:.5rem;flex-wrap:wrap}
+#status{font-size:.75rem;color:var(--g500)}
+#toast{position:fixed;left:50%;bottom:5.5rem;transform:translateX(-50%);background:#111;color:#fff;padding:.7rem 1.1rem;border-radius:10px;font-size:.9rem;max-width:90vw;display:none;z-index:20;text-align:center}
+#pdfhost{position:fixed;left:-99999px;top:0;width:794px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <img src="logo-previjob.png" alt="PREVIJOB Servicio de Prevención" />
+  <h1>Acta de visita</h1>
+  <p>www.previjob.com · 977 22 98 95</p>
+</div></header>
+
+<main>
+<form id="f" autocomplete="off" novalidate>
+
+<section><h2>Datos generales</h2><div class="body"><div class="grid">
+  <label class="f full">Empresa <span class="req">*</span><input type="text" id="empresa" required /></label>
+  <label class="f full">Centro de trabajo<input type="text" id="centro" /></label>
+  <label class="f">Nº de trabajadores<input type="number" id="ntrab" min="0" inputmode="numeric" /></label>
+  <label class="f">Fecha <span class="req">*</span><input type="date" id="fecha" required /></label>
+  <label class="f full">Asistentes<textarea id="asistentes" rows="2" placeholder="Nombre y cargo de las personas presentes"></textarea></label>
+</div></div></section>
+
+<section><h2>Actuaciones técnicas realizadas por PREVIJOB<small>En la fecha indicada (se relacionan las acciones realizadas en la presente visita; en visitas anteriores pueden haberse realizado otras acciones)</small></h2><div class="body">
+  <div class="list two" id="actuaciones"></div>
+</div></section>
+
+<section><h2>Formación anual</h2><div class="body"><div class="list" id="formacion"></div></div></section>
+
+<section><h2>Observaciones</h2><div class="body">
+  <textarea id="observaciones" rows="9" placeholder="Anote aquí las observaciones de la visita"></textarea>
+  <div class="sub">Fotos (opcional)</div>
+  <input type="file" id="fotoIn" accept="image/*" multiple hidden />
+  <button type="button" id="addFoto">📷 Añadir fotos</button>
+  <div class="photos" id="photos"></div>
+</div></section>
+
+<section><h2>Recordatorios para la empresa</h2><div class="body"><ul class="rem" id="recordatorios"></ul></div></section>
+
+<section><h2>Firmas y horario</h2><div class="body">
+  <div class="sigs" id="sigs"></div>
+  <div class="sub">Horario de la visita</div>
+  <div class="times">
+    <div class="timef"><label class="f">Hora de entrada<input type="time" id="hentrada" /></label><button type="button" data-now="hentrada">Ahora</button></div>
+    <div class="timef"><label class="f">Hora de salida<input type="time" id="hsalida" /></label><button type="button" data-now="hsalida">Ahora</button></div>
+  </div>
+  <div class="sub">Envío</div>
+  <label class="f">Correo de destino (opcional)<input type="email" id="email" placeholder="correo@empresa.com" /></label>
+</div></section>
+
+</form>
+</main>
+
+<div class="bar"><div class="wrap">
+  <div><button type="button" class="danger" id="nuevo">Nueva acta</button> <span id="status"></span></div>
+  <div class="grp">
+    <button type="button" id="btnPdf">Descargar PDF</button>
+    <button type="button" class="primary" id="btnSend">Enviar acta</button>
+  </div>
+</div></div>
+<div id="toast"></div>
+<div id="pdfhost"></div>
+
+<script src="html2pdf.bundle.min.js"></script>
+<script>
+"use strict";
+/* ---------- Contenido del acta (fiel al documento original) ---------- */
+const ACTUACIONES = [
+  "Toma de datos para la evaluación de riesgos / Revisión de la evaluación de riesgos.",
+  "Entrega de la Evaluación de riesgos e instrucciones para su implantación.",
+  "Entrega del Plan de Prevención.",
+  "Entrega del Manual de Gestión Preventiva.",
+  "Entrega de medidas de emergencia e implantación.",
+  "Seguimiento del grado de cumplimiento de las medidas correctoras y análisis de accidentes.",
+  "Revisión de la documentación en materia de prevención de riesgos laborales."
+];
+const FORMACION = [
+  "Se ha realizado formación a los trabajadores (ver registro de formación).",
+  "Se aplaza la formación a petición de la empresa. La empresa se pondrá en contacto con PREVIJOB para fijar un día para llevar a cabo la formación.",
+  "La empresa acudirá a las sesiones de formación Inter-empresarial programadas por PREVIJOB.",
+  "Todos los trabajadores de la empresa disponen de la formación de acuerdo con la planificación."
+];
+const RECORDATORIOS = [
+  "A la incorporación de personal nuevo, se debe entregar información de los riesgos que afecten a su puesto de trabajo, e impartir la formación práctica que asegure que conoce como desempeñar su trabajo de forma segura.",
+  "Asimismo, si lo precisa debe hacer entrega de los EPI's que precise (se deben rellenar y firmar los registros correspondientes).",
+  "La empresa debe ofrecer el reconocimiento médico a sus trabajadores. En casos de nueva incorporación o baja prolongada también debe ofrecer el reconocimiento.",
+  "La formación de los trabajadores sobre los riesgos que les afecten en el trabajo por parte de PREVIJOB es de carácter obligatorio.",
+  "La empresa debe llevar a cabo las medidas correctivas/preventivas recogidas en la planificación preventiva que les ha sido facilitada.",
+  "A través de nuestra página web: www.previjob.com, dispone del acceso a un portal informático desde donde podrá obtener la documentación necesaria para la gestión de la prevención en su empresa en soporte informático. Si no dispone o no recuerda su clave de acceso, puede solicitarla de nuevo poniéndose en contacto con su técnico asignado."
+];
+const FIRMAS = [["previjob","PREVIJOB"],["empresa","RESPONSABLE EMPRESA"],["delegado","DELEGADO DE PREVENCIÓN"]];
+
+/* ---------- Utilidades ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const KEY = "previjob-acta-borrador-v1";
+function toast(m,ms=3500){const t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display="none",ms)}
+const today = () => { const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); };
+const fmtDate = iso => iso ? iso.split("-").reverse().join("/") : "";
+
+/* ---------- Construcción del formulario ---------- */
+$("actuaciones").innerHTML = ACTUACIONES.map((t,i)=>`<label class="chk"><input type="checkbox" data-grp="act" data-i="${i}"><span>${esc(t)}</span></label>`).join("")
+  + `<label class="chk other"><input type="checkbox" id="actOtraChk"><input type="text" id="actOtraTxt" placeholder="Otra actuación (especificar)"></label>`;
+$("formacion").innerHTML = FORMACION.map((t,i)=>`<label class="chk"><input type="checkbox" data-grp="for" data-i="${i}"><span>${esc(t)}</span></label>`).join("");
+$("recordatorios").innerHTML = RECORDATORIOS.map(t=>`<li>${esc(t)}</li>`).join("");
+$("sigs").innerHTML = FIRMAS.map(([k,l])=>`<div class="sig"><div class="hd"><span>${l}</span><button type="button" data-clear="${k}">Borrar</button></div><canvas id="sig_${k}"></canvas><input type="text" id="nom_${k}" placeholder="Nombre (opcional)"></div>`).join("");
+
+/* ---------- Firma en canvas ---------- */
+const pads = {};
+function initPad(k){
+  const c=$("sig_"+k), ctx=c.getContext("2d"); let draw=false, last=null; const p={c,ctx,empty:true};
+  function size(){ const keep=p.empty?null:c.toDataURL(); const r=c.getBoundingClientRect(), ratio=Math.max(window.devicePixelRatio||1,1);
+    c.width=Math.round(r.width*ratio); c.height=Math.round(r.height*ratio); ctx.setTransform(ratio,0,0,ratio,0,0);
+    ctx.lineWidth=2.2; ctx.lineCap="round"; ctx.lineJoin="round"; ctx.strokeStyle="#111";
+    if(keep){const im=new Image(); im.onload=()=>ctx.drawImage(im,0,0,r.width,r.height); im.src=keep;} }
+  p.size=size; p.clear=()=>{ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,c.width,c.height);ctx.restore();p.empty=true;save()};
+  p.load=url=>{ if(!url){return;} const im=new Image(); im.onload=()=>{const r=c.getBoundingClientRect();ctx.drawImage(im,0,0,r.width,r.height);p.empty=false}; im.src=url; };
+  const pos=e=>{const r=c.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}};
+  c.addEventListener("pointerdown",e=>{e.preventDefault();c.setPointerCapture(e.pointerId);draw=true;last=pos(e);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(last.x+.01,last.y);ctx.stroke();p.empty=false});
+  c.addEventListener("pointermove",e=>{if(!draw)return;e.preventDefault();const q=pos(e);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(q.x,q.y);ctx.stroke();last=q});
+  const end=()=>{if(draw){draw=false;save()}}; c.addEventListener("pointerup",end); c.addEventListener("pointercancel",end);
+  size(); pads[k]=p;
+}
+FIRMAS.forEach(([k])=>initPad(k));
+document.querySelectorAll("[data-clear]").forEach(b=>b.onclick=()=>pads[b.dataset.clear].clear());
+let rz; window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>Object.values(pads).forEach(p=>p.size()),200)});
+
+/* ---------- Fotos ---------- */
+let fotos=[];
+function renderFotos(){ $("photos").innerHTML=fotos.map((f,i)=>`<div class="ph"><img src="${f}" alt="Foto ${i+1}"><button type="button" data-rm="${i}">✕</button></div>`).join("");
+  document.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{fotos.splice(+b.dataset.rm,1);renderFotos();save()}); }
+$("addFoto").onclick=()=>$("fotoIn").click();
+$("fotoIn").onchange=async e=>{ for(const file of e.target.files){ try{ fotos.push(await compress(file)); }catch{ toast("No se pudo cargar una imagen"); } } e.target.value=""; renderFotos(); save(); };
+function compress(file,max=1100,q=.72){ return new Promise((res,rej)=>{ const url=URL.createObjectURL(file), im=new Image();
+  im.onload=()=>{const s=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(url);res(c.toDataURL("image/jpeg",q))};
+  im.onerror=rej; im.src=url; }); }
+
+/* ---------- Estado (borrador automático) ---------- */
+const TEXT_IDS=["empresa","centro","ntrab","fecha","asistentes","observaciones","hentrada","hsalida","email","actOtraTxt","nom_previjob","nom_empresa","nom_delegado"];
+function collect(){
+  const d={}; TEXT_IDS.forEach(i=>d[i]=$(i).value);
+  d.act=[...document.querySelectorAll('[data-grp="act"]')].map(x=>x.checked);
+  d.actOtra=$("actOtraChk").checked;
+  d.for=[...document.querySelectorAll('[data-grp="for"]')].map(x=>x.checked);
+  d.sig={}; FIRMAS.forEach(([k])=>d.sig[k]=pads[k].empty?null:pads[k].c.toDataURL("image/png"));
+  d.fotos=fotos; return d;
+}
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(collect()));$("status").textContent="Borrador guardado "+new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}catch{$("status").textContent="Borrador no guardado (espacio lleno)"} }
+function restore(d){
+  TEXT_IDS.forEach(i=>{ if(d[i]!=null) $(i).value=d[i]; });
+  document.querySelectorAll('[data-grp="act"]').forEach((x,i)=>x.checked=!!(d.act&&d.act[i]));
+  $("actOtraChk").checked=!!d.actOtra;
+  document.querySelectorAll('[data-grp="for"]').forEach((x,i)=>x.checked=!!(d.for&&d.for[i]));
+  fotos=d.fotos||[]; renderFotos();
+  FIRMAS.forEach(([k])=>{pads[k].clear(); if(d.sig&&d.sig[k]) pads[k].load(d.sig[k]);});
+}
+let st; $("f").addEventListener("input",()=>{clearTimeout(st);st=setTimeout(save,400)});
+$("f").addEventListener("change",save);
+$("actOtraTxt").addEventListener("input",()=>{if($("actOtraTxt").value)$("actOtraChk").checked=true});
+document.querySelectorAll("[data-now]").forEach(b=>b.onclick=()=>{const n=new Date();$(b.dataset.now).value=String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0");save()});
+
+function fresh(){ localStorage.removeItem(KEY); $("f").reset(); document.querySelectorAll("input[type=checkbox]").forEach(x=>x.checked=false); fotos=[];renderFotos(); Object.values(pads).forEach(p=>{p.clear()}); localStorage.removeItem(KEY); $("fecha").value=today(); $("status").textContent=""; }
+$("nuevo").onclick=()=>{ if(confirm("¿Empezar una nueva acta? Se borrará el borrador actual.")) fresh(); };
+try{ const s=localStorage.getItem(KEY); if(s) restore(JSON.parse(s)); }catch{}
+if(!$("fecha").value) $("fecha").value=today();
+
+/* ---------- Validación ---------- */
+function validate(){
+  let ok=true; ["empresa","fecha"].forEach(i=>{const e=$(i); const bad=!e.value.trim(); e.classList.toggle("invalid",bad); if(bad)ok=false;});
+  if(!ok){ toast("Completa los campos obligatorios: empresa y fecha."); $("empresa").value.trim()?$("fecha").focus():$("empresa").focus(); return false; }
+  if($("email").value && !$("email").checkValidity()){ toast("El correo de destino no es válido."); $("email").focus(); return false; }
+  return true;
+}
+
+/* ---------- PDF ---------- */
+function buildPdfHtml(d){
+  const chk=(on,t)=>`<div style="display:flex;gap:6px;margin:3px 0;font-size:10.5px;line-height:1.3"><div style="flex:0 0 12px;height:12px;border:1.2px solid #111;text-align:center;font-size:11px;line-height:11px;font-weight:700">${on?"✕":""}</div><div>${t}</div></div>`;
+  const band=(t,sub)=>`<div style="background:#0d0d0d;color:#fff;padding:4px 8px;font-size:10px;font-weight:700;${/OBSERV/.test(t)?"font-style:italic;font-size:11px;":""}margin-top:8px">${t}${sub?`<span style="font-weight:400"> ${sub}</span>`:""}</div>`;
+  const act=ACTUACIONES.map((t,i)=>chk(d.act[i],esc(t)));
+  act.push(chk(d.actOtra, d.actOtra&&d.actOtraTxt?esc(d.actOtraTxt):"&nbsp;"));
+  // orden original: izquierda 1,3,5,7 · derecha 2,4,6,otra
+  const L=[0,2,4,6].map(i=>act[i]).join(""), R=[1,3,5,7].map(i=>act[i]).join("");
+  const sig=k=>d.sig[k]?`<img src="${d.sig[k]}" style="max-height:62px;max-width:100%">`:"";
+  const nom=k=>d["nom_"+k]?`<div style="font-size:9px;margin-top:2px">${esc(d["nom_"+k])}</div>`:"";
+  const fotosHtml=d.fotos.length?`<div class="brk" style="page-break-before:always;break-before:page">${band("FOTOGRAFÍAS")}<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">${d.fotos.map(f=>`<div style="width:48%;page-break-inside:avoid"><img src="${f}" style="width:100%;border:1px solid #999"></div>`).join("")}</div></div>`:"";
+  const td="border:1px solid #111;padding:4px 6px;font-size:10.5px;vertical-align:top";
+  return `<div style="font-family:Arial,Helvetica,sans-serif;color:#111;width:754px;padding:0">
+  <table style="width:100%;border-collapse:collapse;margin-bottom:6px"><tr>
+    <td style="vertical-align:middle"><div style="font-size:26px;font-weight:800;letter-spacing:.5px">ACTA DE VISITA</div><div style="font-size:10px;margin-top:2px">www.previjob.com &nbsp;·&nbsp; 977 22 98 95</div></td>
+    <td style="text-align:right;width:250px"><div style="background:#000;display:inline-block;padding:6px 10px;border-radius:4px"><img src="logo-previjob.png" style="height:48px;display:block"></div></td></tr></table>
+  <table style="width:100%;border-collapse:collapse">
+    <tr><td style="${td};width:64%"><b>Empresa:</b> ${esc(d.empresa)}<br><div style="margin-top:4px"><b>Centro de trabajo:</b> ${esc(d.centro)}</div></td>
+        <td style="${td};width:18%"><b>Nº trab:</b> ${esc(d.ntrab)}</td>
+        <td style="${td};width:18%"><b>Pág.</b> <span class="pgph">&nbsp;</span></td></tr>
+    <tr><td style="${td}" ><b>Asistentes:</b> ${esc(d.asistentes).replace(/\n/g,"<br>")}</td><td style="${td}" colspan="2"><b>Fecha:</b> ${fmtDate(d.fecha)}</td></tr>
+  </table>
+  ${band("ACTUACIONES TÉCNICAS REALIZADAS POR PREVIJOB","en la fecha indicada (se relacionan las acciones realizadas en la presente visita / en visitas anteriores pueden haberse realizado otras acciones)")}
+  <table style="width:100%;border-collapse:collapse;margin-top:4px"><tr><td style="width:50%;vertical-align:top;padding-right:8px">${L}</td><td style="width:50%;vertical-align:top">${R}</td></tr></table>
+  <div style="font-weight:700;font-size:11px;margin-top:8px;text-decoration:underline">Formación anual:</div>
+  ${FORMACION.map((t,i)=>chk(d.for[i],esc(t))).join("")}
+  ${band("OBSERVACIONES:")}
+  <div style="border:1px solid #111;border-top:0;min-height:170px;padding:6px 8px;font-size:11px;white-space:pre-wrap">${esc(d.observaciones)}</div>
+  <div style="page-break-inside:avoid;break-inside:avoid">
+  ${band("RECORDATORIOS PARA LA EMPRESA:")}
+  <ul style="margin:5px 0 0;padding-left:16px;font-size:9.3px;line-height:1.3">${RECORDATORIOS.map(t=>`<li style="margin-bottom:3px">${esc(t).replace("www.previjob.com","<b>www.previjob.com</b>")}</li>`).join("")}</ul>
+  <table style="width:100%;border-collapse:collapse;margin-top:8px;table-layout:fixed">
+    <tr style="background:#0d0d0d;color:#fff;font-size:9.5px;font-weight:700"><td style="border:1px solid #111;padding:3px 5px">PREVIJOB</td><td style="border:1px solid #111;padding:3px 5px">RESPONSABLE EMPRESA</td><td style="border:1px solid #111;padding:3px 5px">DELEGADO DE PREVENCIÓN</td><td style="border:1px solid #111;padding:3px 5px">HORA DE ENTRADA:</td></tr>
+    <tr><td rowspan="3" style="border:1px solid #111;height:88px;padding:4px;text-align:center;vertical-align:middle">${sig("previjob")}${nom("previjob")}</td><td rowspan="3" style="border:1px solid #111;padding:4px;text-align:center;vertical-align:middle">${sig("empresa")}${nom("empresa")}</td><td rowspan="3" style="border:1px solid #111;padding:4px;text-align:center;vertical-align:middle">${sig("delegado")}${nom("delegado")}</td>
+      <td style="border:1px solid #111;padding:4px;font-size:12px;font-weight:700;text-align:center;height:26px">${esc(d.hentrada)}</td></tr>
+    <tr style="background:#0d0d0d;color:#fff;font-size:9.5px;font-weight:700"><td style="border:1px solid #111;padding:3px 5px">HORA DE SALIDA:</td></tr>
+    <tr><td style="border:1px solid #111;padding:4px;font-size:12px;font-weight:700;text-align:center;height:26px">${esc(d.hsalida)}</td></tr>
+  </table></div>
+  ${fotosHtml}
+  </div>`;
+}
+function fileName(d){ const e=(d.empresa||"empresa").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40); return `acta-visita-${e}-${d.fecha||"sin-fecha"}.pdf`; }
+async function makePdf(d){
+  if(typeof html2pdf==="undefined") throw new Error("No se pudo cargar la biblioteca PDF.");
+  const host=$("pdfhost"); host.innerHTML=buildPdfHtml(d);
+  const opt={margin:[10,10,14,10],filename:fileName(d),image:{type:"jpeg",quality:.95},html2canvas:{scale:2,useCORS:true,backgroundColor:"#fff"},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"],avoid:["li","tr"]}};
+  const blob=await html2pdf().set(opt).from(host.firstElementChild).toPdf().get("pdf").then(pdf=>{
+    const n=pdf.internal.getNumberOfPages(), w=pdf.internal.pageSize.getWidth(), h=pdf.internal.pageSize.getHeight();
+    for(let i=1;i<=n;i++){ pdf.setPage(i); pdf.setFontSize(8); pdf.setTextColor(90); pdf.text(`Pág. ${i} de ${n}`,w-10,h-6,{align:"right"}); pdf.text("PREVIJOB Servicio de Prevención · www.previjob.com · 977 22 98 95",10,h-6); }
+    return pdf.output("blob"); });
+  host.innerHTML=""; return {blob,name:opt.filename};
+}
+function download(blob,name){ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); }
+async function busy(btn,fn){ const t=btn.textContent; btn.disabled=true; btn.textContent="Generando…"; try{ await fn(); }catch(e){ console.error(e); toast("Error: "+(e.message||e),6000); } finally{ btn.disabled=false; btn.textContent=t; } }
+
+$("btnPdf").onclick=()=>{ if(!validate())return; busy($("btnPdf"),async()=>{ const {blob,name}=await makePdf(collect()); download(blob,name); toast("PDF descargado"); }); };
+$("btnSend").onclick=()=>{ if(!validate())return; busy($("btnSend"),async()=>{
+  const d=collect(), {blob,name}=await makePdf(d); download(blob,name);
+  const file=new File([blob],name,{type:"application/pdf"});
+  const asunto=`Acta de visita PREVIJOB – ${d.empresa} – ${fmtDate(d.fecha)}`;
+  const cuerpo=`Buenos días,\n\nAdjuntamos el acta de la visita realizada el ${fmtDate(d.fecha)} en ${d.empresa}${d.centro?" ("+d.centro+")":""}.\n\nUn saludo,\nPREVIJOB Servicio de Prevención\nwww.previjob.com · 977 22 98 95`;
+  if(navigator.canShare && navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title:asunto,text:cuerpo}); toast("Acta compartida"); return; }catch(e){ if(e.name==="AbortError"){return;} } }
+  location.href=`mailto:${encodeURIComponent(d.email||"")}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo+"\n\n(Adjunta el PDF descargado: "+name+")")}`;
+  toast("PDF descargado. Adjúntalo al correo que se ha abierto.",6000);
+}); };
+</script>
+</body>
+</html>
