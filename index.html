@@ -11,7 +11,7 @@
 body{margin:0;font-family:var(--font);font-size:16px;line-height:1.5;color:var(--g900);background:linear-gradient(125deg,#f8fcfd,#eaf7fb 52%,#f0f8e9) fixed;-webkit-font-smoothing:antialiased}
 header{background:linear-gradient(135deg,#0d0d0d,#1a1a1a);color:#fff;padding:1rem;border-bottom:3px solid var(--green)}
 .wrap{max-width:860px;margin:0 auto}
-header img{display:block;max-height:58px;margin-bottom:.6rem}
+header img{display:block;max-height:58px;margin-bottom:.6rem;background:#fff;padding:6px 10px;border-radius:6px}
 header h1{margin:0;font-size:1.45rem}
 header p{margin:.15rem 0 0;font-size:.85rem;opacity:.85}
 main{max-width:860px;margin:0 auto;padding:1rem 1rem 6rem}
@@ -272,7 +272,7 @@ async function makePdf(d){
   /* Cabecera */
   setF(22,"bold"); doc.setTextColor(17); doc.text("ACTA DE VISITA",M,y+8);
   setF(8.5); doc.text("www.previjob.com   |   977 22 98 95",M,y+13.5);
-  if(logo){ const lh=14, lw=lh*logo.width/logo.height; doc.setFillColor(0,0,0); doc.rect(PW-M-lw-4,y-1,lw+4,lh+2,"F"); doc.addImage(logo,"PNG",PW-M-lw-2,y,lw,lh); }
+  if(logo){ const lh=14, lw=lh*logo.width/logo.height; doc.addImage(logo,"PNG",PW-M-lw,y,lw,lh); }
   y+=19;
 
   /* Datos generales */
