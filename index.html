@@ -46,6 +46,11 @@ input:focus,textarea:focus{outline:2px solid var(--cyan);border-color:var(--cyan
 .sig .hd{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;font-weight:700;margin-bottom:.3rem}
 .sig button{font-size:.75rem;padding:.25rem .6rem;min-height:30px}
 .sig input{margin-top:.4rem}
+.sigbtns{display:flex;gap:.4rem;margin-top:.4rem}
+.sigbtns button{flex:1;font-size:.78rem;min-height:36px;padding:.25rem .4rem}
+.remember{display:flex;gap:.4rem;align-items:center;font-size:.75rem;color:var(--g700);margin-top:.4rem}
+.remember input{width:18px;height:18px;margin:0;accent-color:var(--green)}
+.sig.focus canvas{border-color:var(--cyan);border-style:solid}
 .times{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
 .timef{display:flex;gap:.4rem;align-items:flex-end}
 .timef label{flex:1}
@@ -94,6 +99,8 @@ button.mic.on{background:var(--red);color:#fff;border-color:var(--red);animation
 
 <section><h2>Observaciones</h2><div class="body">
   <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem"><button type="button" id="btnMic" class="mic">🎤 Dictar</button><span id="micMsg" style="font-size:.8rem;color:var(--g500)">Pulsa y habla; el texto se añade al final.</span></div>
+  <details style="font-size:.8rem;color:var(--g700);margin-bottom:.5rem"><summary style="cursor:pointer">Cómo dictar la puntuación</summary>
+  <div style="margin-top:.3rem;line-height:1.6">Di la palabra del signo donde quieras ponerlo: <b>coma</b> (,) · <b>punto</b> (.) · <b>punto y aparte</b> (salto de párrafo) · <b>nueva línea</b> · <b>punto y coma</b> (;) · <b>dos puntos</b> (:) · <b>puntos suspensivos</b> (...) · <b>abrir / cerrar interrogación</b> (¿ ?) · <b>abrir / cerrar exclamación</b> (¡ !) · <b>abrir / cerrar paréntesis</b> · <b>guion</b>.<br>Ejemplo: «se revisa la escalera coma está en buen estado punto y aparte».</div></details>
   <textarea id="observaciones" rows="9" placeholder="Anote aquí las observaciones de la visita"></textarea>
   <div class="sub">Fotos (opcional)</div>
   <input type="file" id="fotoIn" accept="image/*" multiple hidden />
@@ -165,7 +172,11 @@ $("actuaciones").innerHTML = ACTUACIONES.map((t,i)=>`<label class="chk"><input t
   + ["","2","3"].map(n=>`<label class="chk other"><input type="checkbox" id="actOtraChk${n}"><input type="text" id="actOtraTxt${n}" placeholder="Otra actuación (especificar)"></label>`).join("");
 $("formacion").innerHTML = FORMACION.map((t,i)=>`<label class="chk"><input type="checkbox" data-grp="for" data-i="${i}"><span>${esc(t)}</span></label>`).join("");
 $("recordatorios").innerHTML = RECORDATORIOS.map(t=>`<li>${esc(t)}</li>`).join("");
-$("sigs").innerHTML = FIRMAS.map(([k,l])=>`<div class="sig"><div class="hd"><span>${l}</span><button type="button" data-clear="${k}">Borrar</button></div><canvas id="sig_${k}"></canvas><input type="text" id="nom_${k}" placeholder="Nombre (opcional)"></div>`).join("");
+$("sigs").innerHTML = FIRMAS.map(([k,l])=>`<div class="sig" data-sig="${k}"><div class="hd"><span>${l}</span><button type="button" data-clear="${k}">Borrar</button></div><canvas id="sig_${k}"></canvas>
+  <div class="sigbtns"><button type="button" data-img="${k}">🖼 Imagen</button><button type="button" data-paste="${k}">📋 Pegar</button></div>
+  <input type="file" accept="image/*" id="sigfile_${k}" hidden>
+  ${k==="previjob"?`<label class="remember"><input type="checkbox" id="recordarFirma"> Recordar mi firma y sello en este dispositivo</label>`:""}
+  <input type="text" id="nom_${k}" placeholder="Nombre (opcional)"></div>`).join("");
 
 /* ---------- Firma en canvas ---------- */
 const pads = {};
@@ -174,17 +185,42 @@ function initPad(k){
   function size(){ const keep=p.empty?null:c.toDataURL(); const r=c.getBoundingClientRect(), ratio=Math.max(window.devicePixelRatio||1,1);
     c.width=Math.round(r.width*ratio); c.height=Math.round(r.height*ratio); ctx.setTransform(ratio,0,0,ratio,0,0);
     ctx.lineWidth=2.2; ctx.lineCap="round"; ctx.lineJoin="round"; ctx.strokeStyle="#111";
-    if(keep){const im=new Image(); im.onload=()=>ctx.drawImage(im,0,0,r.width,r.height); im.src=keep;} }
-  p.size=size; p.clear=()=>{ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,c.width,c.height);ctx.restore();p.empty=true;save()};
+    if(p.img){const im=new Image(); im.onload=()=>drawImgFit(im); im.src=p.img;}
+    else if(keep){const im=new Image(); im.onload=()=>ctx.drawImage(im,0,0,r.width,r.height); im.src=keep;} }
+  p.img=null;
+  function drawImgFit(im){ const r=c.getBoundingClientRect(); const sc=Math.min(r.width/im.width,r.height/im.height); const w=im.width*sc,h=im.height*sc; ctx.drawImage(im,(r.width-w)/2,(r.height-h)/2,w,h); }
+  p.setImage=url=>{ const im=new Image(); im.onload=()=>{ ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,c.width,c.height);ctx.restore(); drawImgFit(im); p.img=url; p.empty=false; save(); if(k==="previjob") rememberSig(); }; im.src=url; };
+  p.size=size; p.clear=()=>{ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,c.width,c.height);ctx.restore();p.empty=true;p.img=null;save()};
   p.load=url=>{ if(!url){return;} const im=new Image(); im.onload=()=>{const r=c.getBoundingClientRect();ctx.drawImage(im,0,0,r.width,r.height);p.empty=false}; im.src=url; };
   const pos=e=>{const r=c.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}};
-  c.addEventListener("pointerdown",e=>{e.preventDefault();c.setPointerCapture(e.pointerId);draw=true;last=pos(e);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(last.x+.01,last.y);ctx.stroke();p.empty=false});
+  c.addEventListener("pointerdown",e=>{e.preventDefault();c.setPointerCapture(e.pointerId);draw=true;last=pos(e);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(last.x+.01,last.y);ctx.stroke();p.empty=false;p.img=null});
   c.addEventListener("pointermove",e=>{if(!draw)return;e.preventDefault();const q=pos(e);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(q.x,q.y);ctx.stroke();last=q});
-  const end=()=>{if(draw){draw=false;save()}}; c.addEventListener("pointerup",end); c.addEventListener("pointercancel",end);
+  const end=()=>{if(draw){draw=false;save(); if(k==="previjob"&&typeof rememberSig==="function") rememberSig();}}; c.addEventListener("pointerup",end); c.addEventListener("pointercancel",end);
   size(); pads[k]=p;
 }
 FIRMAS.forEach(([k])=>initPad(k));
-document.querySelectorAll("[data-clear]").forEach(b=>b.onclick=()=>pads[b.dataset.clear].clear());
+document.querySelectorAll("[data-clear]").forEach(b=>b.onclick=()=>{ pads[b.dataset.clear].clear(); if(b.dataset.clear==="previjob") rememberSig(); });
+
+/* Imagen de firma / sello: subir, pegar (Ctrl+V o botón) */
+function imageToPng(src,max=900){ return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>{ const sc=Math.min(1,max/Math.max(im.width,im.height)); const c=document.createElement("canvas"); c.width=Math.round(im.width*sc); c.height=Math.round(im.height*sc); c.getContext("2d").drawImage(im,0,0,c.width,c.height); res(c.toDataURL("image/png")); }; im.onerror=rej; im.src=src; }); }
+async function setSigFromBlob(k,blob){ const url=URL.createObjectURL(blob); try{ pads[k].setImage(await imageToPng(url)); toast("Imagen añadida a la firma"); }catch{ toast("No se pudo leer la imagen"); } finally{ setTimeout(()=>URL.revokeObjectURL(url),2000); } }
+let sigTarget="previjob";
+document.querySelectorAll(".sig").forEach(el=>{ el.addEventListener("pointerdown",()=>{ sigTarget=el.dataset.sig; document.querySelectorAll(".sig").forEach(x=>x.classList.toggle("focus",x===el)); }); });
+document.querySelectorAll("[data-img]").forEach(b=>{ const k=b.dataset.img, inp=$("sigfile_"+k); b.onclick=()=>inp.click(); inp.onchange=()=>{ const f=inp.files[0]; if(f) setSigFromBlob(k,f); inp.value=""; }; });
+document.querySelectorAll("[data-paste]").forEach(b=>b.onclick=async()=>{ const k=b.dataset.paste; sigTarget=k;
+  try{ if(!navigator.clipboard||!navigator.clipboard.read) throw 0; const items=await navigator.clipboard.read();
+    for(const it of items){ const t=it.types.find(x=>x.startsWith("image/")); if(t){ await setSigFromBlob(k,await it.getType(t)); return; } }
+    toast("No hay ninguna imagen copiada en el portapapeles.");
+  }catch{ toast("Tu navegador no deja leer el portapapeles con el botón. Toca el recuadro y pulsa Ctrl+V, o usa «Imagen».",6000); } });
+document.addEventListener("paste",e=>{ const a=document.activeElement; if(a&&(a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type==="text"))) return;
+  const it=[...(e.clipboardData?.items||[])].find(x=>x.type.startsWith("image/")); if(!it) return; e.preventDefault(); setSigFromBlob(sigTarget,it.getAsFile()); });
+
+/* Recordar firma del técnico */
+const SIGKEY="previjob-firma-tecnico-v1";
+function rememberSig(){ try{ const p=pads.previjob; if($("recordarFirma").checked && !p.empty){ localStorage.setItem(SIGKEY,JSON.stringify({img:p.img||p.c.toDataURL("image/png"),nom:$("nom_previjob").value})); } else if(!$("recordarFirma").checked){ localStorage.removeItem(SIGKEY); } }catch{ toast("No se pudo guardar la firma (espacio lleno)"); } }
+function loadRememberedSig(){ try{ const r=JSON.parse(localStorage.getItem(SIGKEY)||"null"); if(!r) return; $("recordarFirma").checked=true; if(pads.previjob.empty&&r.img) pads.previjob.setImage(r.img); if(!$("nom_previjob").value&&r.nom) $("nom_previjob").value=r.nom; }catch{} }
+$("recordarFirma").addEventListener("change",rememberSig);
+$("nom_previjob").addEventListener("change",rememberSig);
 let rz; window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>Object.values(pads).forEach(p=>p.size()),200)});
 
 /* ---------- Fotos ---------- */
@@ -204,7 +240,8 @@ function collect(){
   d.act=[...document.querySelectorAll('[data-grp="act"]')].map(x=>x.checked);
   d.actOtra=$("actOtraChk").checked; d.actOtra2=$("actOtraChk2").checked; d.actOtra3=$("actOtraChk3").checked;
   d.for=[...document.querySelectorAll('[data-grp="for"]')].map(x=>x.checked);
-  d.sig={}; FIRMAS.forEach(([k])=>d.sig[k]=pads[k].empty?null:pads[k].c.toDataURL("image/png"));
+  d.sig={}; FIRMAS.forEach(([k])=>d.sig[k]=pads[k].empty?null:(pads[k].img||pads[k].c.toDataURL("image/png")));
+  d.sigIsImg={}; FIRMAS.forEach(([k])=>d.sigIsImg[k]=!!pads[k].img);
   d.fotos=fotos; return d;
 }
 function save(){ try{localStorage.setItem(KEY,JSON.stringify(collect()));$("status").textContent="Borrador guardado "+new Date().toLocaleTimeString("es-ES",{hour:"2-digit",minute:"2-digit"})}catch{$("status").textContent="Borrador no guardado (espacio lleno)"} }
@@ -214,17 +251,18 @@ function restore(d){
   $("actOtraChk").checked=!!d.actOtra; $("actOtraChk2").checked=!!d.actOtra2; $("actOtraChk3").checked=!!d.actOtra3;
   document.querySelectorAll('[data-grp="for"]').forEach((x,i)=>x.checked=!!(d.for&&d.for[i]));
   fotos=d.fotos||[]; renderFotos();
-  FIRMAS.forEach(([k])=>{pads[k].clear(); if(d.sig&&d.sig[k]) pads[k].load(d.sig[k]);});
+  FIRMAS.forEach(([k])=>{pads[k].clear(); if(d.sig&&d.sig[k]){ if(d.sigIsImg&&d.sigIsImg[k]) pads[k].setImage(d.sig[k]); else pads[k].load(d.sig[k]); }});
 }
 let st; $("f").addEventListener("input",()=>{clearTimeout(st);st=setTimeout(save,400)});
 $("f").addEventListener("change",save);
 ["","2","3"].forEach(n=>$("actOtraTxt"+n).addEventListener("input",()=>{if($("actOtraTxt"+n).value)$("actOtraChk"+n).checked=true}));
 document.querySelectorAll("[data-now]").forEach(b=>b.onclick=()=>{const n=new Date();$(b.dataset.now).value=String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0");save()});
 
-function fresh(){ localStorage.removeItem(KEY); $("f").reset(); document.querySelectorAll("input[type=checkbox]").forEach(x=>x.checked=false); fotos=[];renderFotos(); Object.values(pads).forEach(p=>{p.clear()}); localStorage.removeItem(KEY); $("fecha").value=today(); $("status").textContent=""; }
+function fresh(){ localStorage.removeItem(KEY); $("f").reset(); document.querySelectorAll("input[type=checkbox]").forEach(x=>x.checked=false); fotos=[];renderFotos(); Object.values(pads).forEach(p=>{p.clear()}); localStorage.removeItem(KEY); $("fecha").value=today(); $("status").textContent=""; loadRememberedSig(); }
 $("nuevo").onclick=()=>{ if(confirm("¿Empezar una nueva acta? Se borrará el borrador actual.")) fresh(); };
 try{ const s=localStorage.getItem(KEY); if(s) restore(JSON.parse(s)); }catch{}
 if(!$("fecha").value) $("fecha").value=today();
+loadRememberedSig();
 
 
 /* ---------- Dictado por voz ---------- */
@@ -236,14 +274,50 @@ if(!$("fecha").value) $("fecha").value=today();
   const join=(a,b)=>{ if(!b) return a; if(!a) return b; return /[\s\n]$/.test(a)?a+b:a+" "+b; };
   const cap=t=>t.replace(/^\s*([a-záéíóúñ])/i,(m,c)=>m.replace(c,c.toUpperCase()));
   const norm=t=>t.toLowerCase().replace(/[.,;:¿?¡!]/g,"").replace(/\s+/g," ").trim();
+  // Comandos de puntuación dichos en voz alta
+  const PUNCT=[
+    [/\b(punto y aparte|nuevo párrafo|nuevo parrafo)\b/gi,".\n"],
+    [/\b(nueva línea|nueva linea|salto de línea|salto de linea)\b/gi,"\n"],
+    [/\bpunto y seguido\b/gi,"."],
+    [/\bpunto y coma\b/gi,";"],
+    [/\bdos puntos\b/gi,":"],
+    [/\bpuntos suspensivos\b/gi,"..."],
+    [/\babrir interrogación\b|\babre interrogación\b|\babrir pregunta\b/gi,"¿"],
+    [/\bcerrar interrogación\b|\bcierra interrogación\b|\bcerrar pregunta\b/gi,"?"],
+    [/\babrir exclamación\b|\babre exclamación\b/gi,"¡"],
+    [/\bcerrar exclamación\b|\bcierra exclamación\b/gi,"!"],
+    [/\babrir paréntesis\b|\babre paréntesis\b/gi,"("],
+    [/\bcerrar paréntesis\b|\bcierra paréntesis\b/gi,")"],
+    [/\bguion\b|\bguión\b/gi,"-"],
+    [/\bcoma\b/gi,","],
+    [/\bpunto\b/gi,"."]
+  ];
+  function applyPunct(t){
+    PUNCT.forEach(([re,v])=>{ t=t.replace(re,"\u0000"+v+"\u0000"); });
+    t=t.replace(/\s*\u0000([,.;:?!)…]|\.\.\.|\.\n)\u0000\s*/g,"$1 ")   // signos de cierre: pegados a la palabra anterior
+       .replace(/\s*\u0000([¿¡(])\u0000\s*/g," $1")                        // signos de apertura: pegados a la siguiente
+       .replace(/\s*\u0000(\n|-)\u0000\s*/g,(m,v)=>v==="\n"?"\n":" - ")
+       .replace(/\u0000/g,"");
+    t=t.replace(/([.,;:?!]) +\n/g,"$1\n").replace(/\n +/g,"\n").replace(/ {2,}/g," ").replace(/([.,;:])\1+/g,"$1").replace(/\.{4,}/g,"...");
+    // mayúscula tras . ? ! y salto de línea
+    t=t.replace(/([.?!]\s+|\n|[¿¡])([a-záéíóúñ])/g,(m,a,c)=>a+c.toUpperCase());
+    return t.replace(/^ +/,"").replace(/ +$/,"");
+  }
+  function appendText(t){
+    const v=ta.value;
+    if(!v){ ta.value=cap(t.replace(/^[\s,.;:]+/,"")); return; }
+    if(/^[,.;:?!)…]/.test(t) || /^\n/.test(t)) ta.value=v.replace(/ +$/,"")+t;
+    else if(/[\n(¿¡]$/.test(v)) ta.value=v+((/[.?!]\s*$/.test(v.slice(0,-1))||/\n$/.test(v))?cap(t):t);
+    else ta.value=v.replace(/ +$/,"")+" "+(/[.?!]\s*$/.test(v)?cap(t):t);
+    ta.value=ta.value.replace(/[,;:]+(\.)/g,"$1").replace(/([.?!])\n([a-záéíóúñ])/g,(m,a,c)=>a+"\n"+c.toUpperCase());
+  }
   function addFinal(t){
-    t=t.trim(); if(!t) return;
+    t=applyPunct(t.trim()); if(!t) return;
     // evitar repeticiones: mismo texto que la última frase, o ya presente al final del campo
     if(norm(t)===norm(lastAdded)) return;
     const cur=norm(ta.value); if(cur.endsWith(norm(t)) && norm(t).split(" ").length>2) return;
     lastAdded=t;
-    const need=/[.!?]\s*$/.test(ta.value)||ta.value.trim()===""; 
-    ta.value=join(ta.value,need?cap(t):t);
+    appendText(t);
     ta.scrollTop=ta.scrollHeight; save();
   }
   function newRec(){
@@ -255,7 +329,7 @@ if(!$("fecha").value) $("fecha").value=today();
     r.onend=()=>{ if(on){ setTimeout(()=>{ if(!on) return; try{ rec=newRec(); rec.start(); }catch{ stop(); } }, isAndroid?350:150); } };
     return r;
   }
-  function start(){ lastAdded=""; try{ rec=newRec(); rec.start(); on=true; btn.classList.add("on"); btn.textContent="⏹ Parar"; msg.textContent="Escuchando… habla y haz una pausa al terminar cada frase."; }catch{ msg.textContent="No se pudo iniciar el micrófono."; } }
+  function start(){ lastAdded=""; try{ rec=newRec(); rec.start(); on=true; btn.classList.add("on"); btn.textContent="⏹ Parar"; msg.textContent="Escuchando… di «coma», «punto» o «punto y aparte» para puntuar."; }catch{ msg.textContent="No se pudo iniciar el micrófono."; } }
   function stop(silent){ on=false; try{rec&&rec.stop()}catch{} btn.classList.remove("on"); btn.textContent="🎤 Dictar"; if(!silent) msg.textContent="Dictado detenido. Puedes editar el texto."; save(); }
   btn.onclick=()=>on?stop():start();
 })();
