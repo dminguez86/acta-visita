@@ -525,7 +525,7 @@ $("btnSend").onclick=async()=>{
       clave:"previjob-acta-2026",
       tecnico:tec, cliente:cli, pdf, nombre:name,
       asunto:`Acta de visita PREVIJOB – ${d.empresa} – ${fmtDate(d.fecha)}`,
-      texto:`Buenos días,\n\nAdjuntamos el acta de la visita realizada el ${fmtDate(d.fecha)} en ${d.empresa}${d.centro?" ("+d.centro+")":""}.\n\nUn saludo,\nPREVIJOB Servicio de Prevención\nwww.previjob.com · 977 22 98 95`
+      texto:`Buenos días,\n\nAdjuntamos el acta de la visita realizada el ${fmtDate(d.fecha)} en ${d.empresa}${d.centro?" ("+d.centro+")":""}.\n\nUn saludo,\nPREVIJOB Servicio de Prevención\nwww.previjob.com · 977 22 98 95\n\nEste correo se utiliza únicamente para el envío de actas de visita; por favor, no responda a este mensaje. Para cualquier consulta, contacte con su técnico de PREVIJOB${tec?": "+tec:""}.`
     };
     let res;
     try{ res=await fetch(SEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)}); }
