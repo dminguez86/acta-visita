@@ -59,6 +59,7 @@ button:hover{background:var(--g100)}
 button.primary{background:var(--dark);color:#fff;border-color:var(--dark);border-bottom:3px solid var(--green)}
 button.primary:hover{background:#222}
 button.danger{color:var(--red)}
+button:disabled{opacity:.6;cursor:default}
 .photos{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.6rem}
 .photos .ph{position:relative;width:110px;height:110px;border-radius:8px;overflow:hidden;border:1px solid var(--g300)}
 .photos img{width:100%;height:100%;object-fit:cover}
@@ -117,6 +118,11 @@ button.mic.on{background:var(--red);color:#fff;border-color:var(--red);animation
     <div class="timef"><label class="f">Hora de entrada<input type="time" id="hentrada" /></label><button type="button" data-now="hentrada">Ahora</button></div>
     <div class="timef"><label class="f">Hora de salida<input type="time" id="hsalida" /></label><button type="button" data-now="hsalida">Ahora</button></div>
   </div>
+  <div class="sub">Envío por correo</div>
+  <div class="grid">
+    <label class="f">Correo del técnico PREVIJOB<input type="email" id="email_tecnico" placeholder="tecnico@previjob.com" autocomplete="email" /></label>
+    <label class="f">Correo del cliente<input type="email" id="email_cliente" placeholder="correo@empresa.com" autocomplete="off" /></label>
+  </div>
   </div></section>
 
 </form>
@@ -125,7 +131,8 @@ button.mic.on{background:var(--red);color:#fff;border-color:var(--red);animation
 <div class="bar"><div class="wrap">
   <div><button type="button" class="danger" id="nuevo">Nueva acta</button> <span id="status"></span></div>
   <div class="grp">
-    <button type="button" class="primary" id="btnPdf">Descargar PDF</button>
+    <button type="button" id="btnPdf">Descargar PDF</button>
+    <button type="button" class="primary" id="btnSend">📧 Enviar acta</button>
   </div>
 </div></div>
 <div id="toast"></div>
@@ -212,7 +219,7 @@ document.querySelectorAll("[data-paste]").forEach(b=>b.onclick=async()=>{ const 
     for(const it of items){ const t=it.types.find(x=>x.startsWith("image/")); if(t){ await setSigFromBlob(k,await it.getType(t)); return; } }
     toast("No hay ninguna imagen copiada en el portapapeles.");
   }catch{ toast("Tu navegador no deja leer el portapapeles con el botón. Toca el recuadro y pulsa Ctrl+V, o usa «Imagen».",6000); } });
-document.addEventListener("paste",e=>{ const a=document.activeElement; if(a&&(a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&a.type==="text"))) return;
+document.addEventListener("paste",e=>{ const a=document.activeElement; if(a&&(a.tagName==="TEXTAREA"||(a.tagName==="INPUT"&&(a.type==="text"||a.type==="email")))) return;
   const it=[...(e.clipboardData?.items||[])].find(x=>x.type.startsWith("image/")); if(!it) return; e.preventDefault(); setSigFromBlob(sigTarget,it.getAsFile()); });
 
 /* Recordar firma del técnico */
@@ -221,6 +228,12 @@ function rememberSig(){ try{ const p=pads.previjob; if($("recordarFirma").checke
 function loadRememberedSig(){ try{ const r=JSON.parse(localStorage.getItem(SIGKEY)||"null"); if(!r) return; $("recordarFirma").checked=true; if(pads.previjob.empty&&r.img) pads.previjob.setImage(r.img); if(!$("nom_previjob").value&&r.nom) $("nom_previjob").value=r.nom; }catch{} }
 $("recordarFirma").addEventListener("change",rememberSig);
 $("nom_previjob").addEventListener("change",rememberSig);
+
+/* Recordar correo del técnico en actas nuevas */
+const EMAILKEY="previjob-email-tecnico-v1";
+function rememberEmail(){ try{ const v=$("email_tecnico").value.trim(); if(v&&$("email_tecnico").checkValidity()) localStorage.setItem(EMAILKEY,v); else if(!v) localStorage.removeItem(EMAILKEY); }catch{} }
+function loadRememberedEmail(){ try{ if($("email_tecnico").value.trim()) return; const v=localStorage.getItem(EMAILKEY)||""; if(v) $("email_tecnico").value=v; }catch{} }
+$("email_tecnico").addEventListener("change",rememberEmail);
 let rz; window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>Object.values(pads).forEach(p=>p.size()),200)});
 
 /* ---------- Fotos ---------- */
@@ -234,7 +247,7 @@ function compress(file,max=1100,q=.72){ return new Promise((res,rej)=>{ const ur
   im.onerror=rej; im.src=url; }); }
 
 /* ---------- Estado (borrador automático) ---------- */
-const TEXT_IDS=["empresa","centro","ntrab","fecha","asistentes","observaciones","hentrada","hsalida","actOtraTxt","actOtraTxt2","actOtraTxt3","nom_previjob","nom_empresa","nom_delegado"];
+const TEXT_IDS=["empresa","centro","ntrab","fecha","asistentes","observaciones","hentrada","hsalida","email_tecnico","email_cliente","actOtraTxt","actOtraTxt2","actOtraTxt3","nom_previjob","nom_empresa","nom_delegado"];
 function collect(){
   const d={}; TEXT_IDS.forEach(i=>d[i]=$(i).value);
   d.act=[...document.querySelectorAll('[data-grp="act"]')].map(x=>x.checked);
@@ -258,11 +271,12 @@ $("f").addEventListener("change",save);
 ["","2","3"].forEach(n=>$("actOtraTxt"+n).addEventListener("input",()=>{if($("actOtraTxt"+n).value)$("actOtraChk"+n).checked=true}));
 document.querySelectorAll("[data-now]").forEach(b=>b.onclick=()=>{const n=new Date();$(b.dataset.now).value=String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0");save()});
 
-function fresh(){ localStorage.removeItem(KEY); $("f").reset(); document.querySelectorAll("input[type=checkbox]").forEach(x=>x.checked=false); fotos=[];renderFotos(); Object.values(pads).forEach(p=>{p.clear()}); localStorage.removeItem(KEY); $("fecha").value=today(); $("status").textContent=""; loadRememberedSig(); }
+function fresh(){ localStorage.removeItem(KEY); $("f").reset(); document.querySelectorAll("input[type=checkbox]").forEach(x=>x.checked=false); fotos=[];renderFotos(); Object.values(pads).forEach(p=>{p.clear()}); localStorage.removeItem(KEY); $("fecha").value=today(); $("status").textContent=""; loadRememberedSig(); loadRememberedEmail(); }
 $("nuevo").onclick=()=>{ if(confirm("¿Empezar una nueva acta? Se borrará el borrador actual.")) fresh(); };
 try{ const s=localStorage.getItem(KEY); if(s) restore(JSON.parse(s)); }catch{}
 if(!$("fecha").value) $("fecha").value=today();
 loadRememberedSig();
+loadRememberedEmail();
 
 
 /* ---------- Dictado por voz ---------- */
@@ -488,6 +502,42 @@ function download(blob,name){ const a=document.createElement("a"); a.href=URL.cr
 async function busy(btn,fn){ const t=btn.textContent; btn.disabled=true; btn.textContent="Generando…"; try{ await fn(); }catch(e){ console.error(e); toast("Error: "+(e.message||e),6000); } finally{ btn.disabled=false; btn.textContent=t; } }
 
 $("btnPdf").onclick=()=>{ if(!validate())return; busy($("btnPdf"),async()=>{ const {blob,name}=await makePdf(collect()); download(blob,name); toast("PDF descargado"); }); };
+
+/* ---------- Envío por correo (Google Apps Script) ---------- */
+const SEND_URL="https://script.google.com/macros/s/AKfycbxMKUtfgS5ekTBPLTT7D8JlgCXzdzeGYL9wZi5pQdx27h56yjQVlVuDhCIvd4957iST/exec";
+function blobToBase64(blob){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>{ const s=String(r.result||""); const i=s.indexOf(","); res(i>=0?s.slice(i+1):s); }; r.onerror=rej; r.readAsDataURL(blob); }); }
+$("btnSend").onclick=async()=>{
+  if(!validate()) return;
+  const tecEl=$("email_tecnico"), cliEl=$("email_cliente");
+  const tec=tecEl.value.trim(), cli=cliEl.value.trim();
+  let bad=false;
+  if(tec && !tecEl.checkValidity()){ tecEl.classList.add("invalid"); bad=true; } else tecEl.classList.remove("invalid");
+  if(cli && !cliEl.checkValidity()){ cliEl.classList.add("invalid"); bad=true; } else cliEl.classList.remove("invalid");
+  if(bad){ toast("Revisa que los correos sean válidos."); (tec && !tecEl.checkValidity()?tecEl:cliEl).focus(); return; }
+  if(!tec && !cli){ toast("Indica al menos un correo: el del técnico o el del cliente."); tecEl.focus(); return; }
+  rememberEmail();
+  const btn=$("btnSend"), t=btn.textContent;
+  btn.disabled=true; btn.textContent="Enviando…";
+  try{
+    const d=collect(), {blob,name}=await makePdf(d), pdf=await blobToBase64(blob);
+    const destinos=[tec,cli].filter(Boolean);
+    const payload={
+      clave:"previjob-acta-2026",
+      tecnico:tec, cliente:cli, pdf, nombre:name,
+      asunto:`Acta de visita PREVIJOB – ${d.empresa} – ${fmtDate(d.fecha)}`,
+      texto:`Buenos días,\n\nAdjuntamos el acta de la visita realizada el ${fmtDate(d.fecha)} en ${d.empresa}${d.centro?" ("+d.centro+")":""}.\n\nUn saludo,\nPREVIJOB Servicio de Prevención\nwww.previjob.com · 977 22 98 95`
+    };
+    let res;
+    try{ res=await fetch(SEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)}); }
+    catch{ throw new Error("No se pudo conectar con el servidor de correo. Comprueba la conexión e inténtalo de nuevo."); }
+    let data=null;
+    try{ data=JSON.parse(await res.text()); }catch{}
+    if(data && data.ok){ toast("Acta enviada a "+destinos.join(" y ")+".",6000); }
+    else if(data && data.error){ toast("No se pudo enviar: "+data.error,6000); }
+    else { toast("El envío se ha realizado probablemente, aunque no se ha podido confirmar. Revisa la bandeja de entrada.",7000); }
+  }catch(e){ console.error(e); toast("Error: "+(e.message||e),6000); }
+  finally{ btn.disabled=false; btn.textContent=t; }
+};
 </script>
 </body>
 </html>
