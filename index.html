@@ -504,7 +504,7 @@ async function busy(btn,fn){ const t=btn.textContent; btn.disabled=true; btn.tex
 $("btnPdf").onclick=()=>{ if(!validate())return; busy($("btnPdf"),async()=>{ const {blob,name}=await makePdf(collect()); download(blob,name); toast("PDF descargado"); }); };
 
 /* ---------- Envío por correo (Google Apps Script) ---------- */
-const SEND_URL="https://script.google.com/macros/s/AKfycbxMKUtfgS5ekTBPLTT7D8JlgCXzdzeGYL9wZi5pQdx27h56yjQVlVuDhCIvd4957iST/exec";
+const SEND_URL="https://script.google.com/macros/s/AKfycbzKQxKobn7zp-9-Qqoe6lr5MQAsXkx59in-hUxeOX2CroeFIDE3AkXBwnGTKLfgVYh2/exec";
 function blobToBase64(blob){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>{ const s=String(r.result||""); const i=s.indexOf(","); res(i>=0?s.slice(i+1):s); }; r.onerror=rej; r.readAsDataURL(blob); }); }
 $("btnSend").onclick=async()=>{
   if(!validate()) return;
