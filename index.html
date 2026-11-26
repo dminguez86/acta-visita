@@ -22,7 +22,7 @@ header{background:linear-gradient(135deg,#0d0d0d,#1a1a1a);color:#fff;padding:1re
 header img{display:block;max-height:58px;margin-bottom:.6rem;background:#fff;padding:6px 10px;border-radius:6px}
 header h1{margin:0;font-size:1.45rem}
 header p{margin:.15rem 0 0;font-size:.85rem;opacity:.85}
-main{max-width:860px;margin:0 auto;padding:1rem 1rem 6rem}
+main{max-width:860px;margin:0 auto;padding:1rem 1rem 7.5rem}
 section{background:#fff;border-radius:var(--r);box-shadow:0 1px 3px rgba(0,0,0,.08),0 6px 18px rgba(36,125,157,.1);margin-bottom:1rem;overflow:hidden}
 section>h2{margin:0;background:var(--dark);color:#fff;font-size:.82rem;letter-spacing:.03em;text-transform:uppercase;padding:.6rem 1rem;border-left:5px solid var(--green);font-weight:700}
 section>h2 small{display:block;text-transform:none;font-weight:400;opacity:.8;letter-spacing:0;font-size:.75rem;margin-top:.1rem}
@@ -48,17 +48,34 @@ input:focus,textarea:focus{outline:2px solid var(--cyan);border-color:var(--cyan
 .sub:first-child{margin-top:0}
 .rem li{margin-bottom:.45rem;font-size:.86rem;color:var(--g700)}
 .rem{margin:0;padding-left:1.1rem}
-.sigs{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
-@media(max-width:700px){.sigs{grid-template-columns:1fr}}
-.sig canvas{width:100%;height:150px;border:1px dashed var(--g500);border-radius:8px;background:#fff;touch-action:none;display:block}
-.sig .hd{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;font-weight:700;margin-bottom:.3rem}
-.sig button{font-size:.75rem;padding:.25rem .6rem;min-height:30px}
+.sigs{display:grid;grid-template-columns:1fr;gap:1.15rem}
+.sigpad{position:relative}
+.sig canvas{width:100%;height:240px;border:2px solid var(--g500);border-radius:8px;background:#fff;touch-action:none;display:block;cursor:crosshair;-webkit-user-select:none;user-select:none}
+@media(min-width:700px){.sig canvas{height:280px}}
+.sighint{position:absolute;inset:0;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;padding-bottom:1.35rem}
+.sighint::before{content:"";position:absolute;left:10%;right:10%;bottom:2.35rem;border-bottom:1.5px solid #c5c9d0}
+.sighint span{color:#9aa0aa;font-size:.95rem;font-weight:600}
+.sig.has-sig .sighint,.sigmodal.has-sig .sighint{display:none}
+.sig .hd{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;font-weight:700;margin-bottom:.35rem}
+.sig .hd button{font-size:.8rem;padding:.3rem .75rem;min-height:36px;color:var(--red)}
 .sig input{margin-top:.4rem}
-.sigbtns{display:flex;gap:.4rem;margin-top:.4rem}
-.sigbtns button{flex:1;font-size:.78rem;min-height:36px;padding:.25rem .4rem}
+.sigbtns{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.45rem}
+.sigbtns button{flex:1;font-size:.78rem;min-height:40px;padding:.25rem .4rem}
+.sigbtns button[data-full]{flex:1 1 100%;background:#eef8e6;border-color:var(--green)}
 .remember{display:flex;gap:.4rem;align-items:center;font-size:.75rem;color:var(--g700);margin-top:.4rem}
 .remember input{width:18px;height:18px;margin:0;accent-color:var(--green)}
-.sig.focus canvas{border-color:var(--cyan);border-style:solid}
+.sig.focus canvas{border-color:var(--cyan)}
+.sigmodal{position:fixed;inset:0;z-index:80;background:#1a1d23;color:#fff;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom);padding-left:env(safe-area-inset-left)}
+.sigmodal[hidden]{display:none!important}
+.sigmodal-bar{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:.45rem .7rem;padding:.55rem .8rem;background:#0d0d0d;border-bottom:3px solid var(--green)}
+.sigmodal-title{font-weight:700;font-size:.95rem;margin-right:auto}
+.sigmodal-tip{margin:0;font-size:.78rem;color:#c5c9d0;flex:1 1 100%}
+.sigmodal.landscape .sigmodal-tip{display:none}
+.sigmodal-actions{display:flex;gap:.4rem;flex-wrap:wrap}
+.sigmodal-actions button{min-height:40px;padding:.35rem .85rem}
+.sigmodal-pad{position:relative;flex:1 1 auto;margin:.55rem;min-height:0}
+.sigmodal-pad canvas{position:absolute;inset:0;width:100%;height:100%;border:2px solid var(--g300);border-radius:8px;background:#fff;touch-action:none;display:block;cursor:crosshair;-webkit-user-select:none;user-select:none}
+body.sig-open{overflow:hidden}
 .times{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
 .timef{display:flex;gap:.4rem;align-items:flex-end}
 .timef label{flex:1}
@@ -144,6 +161,21 @@ button.mic.on{background:var(--red);color:#fff;border-color:var(--red);animation
   </div>
 </div></div>
 <div id="toast"></div>
+<div id="sigModal" class="sigmodal" hidden>
+  <div class="sigmodal-bar">
+    <div class="sigmodal-title" id="sigModalTitle">Firmar</div>
+    <div class="sigmodal-actions">
+      <button type="button" id="sigModalClear" class="danger">Borrar</button>
+      <button type="button" id="sigModalCancel">Cancelar</button>
+      <button type="button" class="primary" id="sigModalOk">Aceptar</button>
+    </div>
+    <p class="sigmodal-tip" id="sigModalTip">Para firmar más cómodo, gire el móvil en horizontal.</p>
+  </div>
+  <div class="sigmodal-pad" id="sigModalPad">
+    <canvas id="sigModalCanvas"></canvas>
+    <div class="sighint" id="sigModalHint" aria-hidden="true"><span>Firme aquí</span></div>
+  </div>
+</div>
 
 <script src="jspdf.umd.min.js"></script>
 <script>
@@ -187,34 +219,118 @@ $("actuaciones").innerHTML = ACTUACIONES.map((t,i)=>`<label class="chk"><input t
   + ["","2","3"].map(n=>`<label class="chk other"><input type="checkbox" id="actOtraChk${n}"><input type="text" id="actOtraTxt${n}" placeholder="Otra actuación (especificar)"></label>`).join("");
 $("formacion").innerHTML = FORMACION.map((t,i)=>`<label class="chk"><input type="checkbox" data-grp="for" data-i="${i}"><span>${esc(t)}</span></label>`).join("");
 $("recordatorios").innerHTML = RECORDATORIOS.map(t=>`<li>${esc(t)}</li>`).join("");
-$("sigs").innerHTML = FIRMAS.map(([k,l])=>`<div class="sig" data-sig="${k}"><div class="hd"><span>${l}</span><button type="button" data-clear="${k}">Borrar</button></div><canvas id="sig_${k}"></canvas>
-  <div class="sigbtns"><button type="button" data-img="${k}">🖼 Imagen</button><button type="button" data-paste="${k}">📋 Pegar</button></div>
+$("sigs").innerHTML = FIRMAS.map(([k,l])=>`<div class="sig" data-sig="${k}"><div class="hd"><span>${l}</span><button type="button" data-clear="${k}">Borrar</button></div>
+  <div class="sigpad"><canvas id="sig_${k}"></canvas><div class="sighint" aria-hidden="true"><span>Firme aquí</span></div></div>
+  <div class="sigbtns"><button type="button" data-full="${k}"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false" style="vertical-align:-2px;margin-right:.35em"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>Firmar a pantalla completa</button><button type="button" data-img="${k}">🖼 Imagen</button><button type="button" data-paste="${k}">📋 Pegar</button></div>
   <input type="file" accept="image/*" id="sigfile_${k}" hidden>
   ${k==="previjob"?`<label class="remember"><input type="checkbox" id="recordarFirma"> Recordar mi firma y sello en este dispositivo</label>`:""}
   <input type="text" id="nom_${k}" placeholder="Nombre (opcional)"></div>`).join("");
 
 /* ---------- Firma en canvas ---------- */
 const pads = {};
+function syncHint(k){ const el=document.querySelector('.sig[data-sig="'+k+'"]'); if(el) el.classList.toggle("has-sig", !pads[k].empty); }
+function trimCanvas(c){
+  const ctx=c.getContext("2d"), w=c.width, h=c.height;
+  if(!w||!h) return null;
+  const data=ctx.getImageData(0,0,w,h).data;
+  let minX=w,minY=h,maxX=0,maxY=0,found=false;
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      if(data[(y*w+x)*4+3]>20){ found=true; if(x<minX)minX=x; if(y<minY)minY=y; if(x>maxX)maxX=x; if(y>maxY)maxY=y; }
+    }
+  }
+  if(!found) return null;
+  const pad=Math.max(8,Math.round(Math.max(w,h)*0.04));
+  minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad);
+  maxX=Math.min(w-1,maxX+pad); maxY=Math.min(h-1,maxY+pad);
+  const tw=maxX-minX+1, th=maxY-minY+1, out=document.createElement("canvas");
+  out.width=tw; out.height=th;
+  out.getContext("2d").drawImage(c,minX,minY,tw,th,0,0,tw,th);
+  return out.toDataURL("image/png");
+}
+function exportPad(p){ if(!p||p.empty) return null; if(p.img) return p.img; return trimCanvas(p.c)||p.c.toDataURL("image/png"); }
 function initPad(k){
-  const c=$("sig_"+k), ctx=c.getContext("2d"); let draw=false, last=null; const p={c,ctx,empty:true};
-  function size(){ const keep=p.empty?null:c.toDataURL(); const r=c.getBoundingClientRect(), ratio=Math.max(window.devicePixelRatio||1,1);
-    c.width=Math.round(r.width*ratio); c.height=Math.round(r.height*ratio); ctx.setTransform(ratio,0,0,ratio,0,0);
-    ctx.lineWidth=2.2; ctx.lineCap="round"; ctx.lineJoin="round"; ctx.strokeStyle="#111";
-    if(p.img){const im=new Image(); im.onload=()=>drawImgFit(im); im.src=p.img;}
-    else if(keep){const im=new Image(); im.onload=()=>ctx.drawImage(im,0,0,r.width,r.height); im.src=keep;} }
-  p.img=null;
-  function drawImgFit(im){ const r=c.getBoundingClientRect(); const sc=Math.min(r.width/im.width,r.height/im.height); const w=im.width*sc,h=im.height*sc; ctx.drawImage(im,(r.width-w)/2,(r.height-h)/2,w,h); }
-  p.setImage=url=>{ const im=new Image(); im.onload=()=>{ ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,c.width,c.height);ctx.restore(); drawImgFit(im); p.img=url; p.empty=false; save(); if(k==="previjob") rememberSig(); }; im.src=url; };
-  p.size=size; p.clear=()=>{ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,c.width,c.height);ctx.restore();p.empty=true;p.img=null;save()};
-  p.load=url=>{ if(!url){return;} const im=new Image(); im.onload=()=>{const r=c.getBoundingClientRect();ctx.drawImage(im,0,0,r.width,r.height);p.empty=false}; im.src=url; };
-  const pos=e=>{const r=c.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}};
-  c.addEventListener("pointerdown",e=>{e.preventDefault();c.setPointerCapture(e.pointerId);draw=true;last=pos(e);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(last.x+.01,last.y);ctx.stroke();p.empty=false;p.img=null});
-  c.addEventListener("pointermove",e=>{if(!draw)return;e.preventDefault();const q=pos(e);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(q.x,q.y);ctx.stroke();last=q});
-  const end=()=>{if(draw){draw=false;save(); if(k==="previjob"&&typeof rememberSig==="function") rememberSig();}}; c.addEventListener("pointerup",end); c.addEventListener("pointercancel",end);
-  size(); pads[k]=p;
+  const c=$("sig_"+k), ctx=c.getContext("2d"); let draw=false, last=null;
+  const p={c,ctx,empty:true,img:null,cssW:0,cssH:0};
+  function cssRect(){ return c.getBoundingClientRect(); }
+  function prepStroke(){ const ratio=Math.max(window.devicePixelRatio||1,1); ctx.setTransform(ratio,0,0,ratio,0,0); ctx.lineWidth=2.6; ctx.lineCap="round"; ctx.lineJoin="round"; ctx.strokeStyle="#111"; }
+  function drawImgFit(im){ const r=cssRect(); const sc=Math.min(r.width/im.width,r.height/im.height); const w=im.width*sc,h=im.height*sc; ctx.drawImage(im,(r.width-w)/2,(r.height-h)/2,w,h); }
+  function size(){
+    const r=cssRect(), ratio=Math.max(window.devicePixelRatio||1,1);
+    const nw=Math.round(r.width*ratio), nh=Math.round(r.height*ratio);
+    if(nw<=0||nh<=0) return;
+    const prevW=p.cssW, prevH=p.cssH;
+    const keep=(!p.empty && !p.img && c.width && c.height) ? c.toDataURL() : null;
+    c.width=nw; c.height=nh; p.cssW=r.width; p.cssH=r.height; prepStroke();
+    if(p.img){ const im=new Image(); im.onload=()=>drawImgFit(im); im.src=p.img; }
+    else if(keep && prevW && prevH){
+      const im=new Image();
+      im.onload=()=>{ const sc=Math.min(1, r.width/prevW, r.height/prevH); const w=prevW*sc,h=prevH*sc; ctx.drawImage(im,(r.width-w)/2,(r.height-h)/2,w,h); };
+      im.src=keep;
+    }
+  }
+  p.setImage=url=>{ const im=new Image(); im.onload=()=>{ ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,c.width,c.height);ctx.restore(); drawImgFit(im); p.img=url; p.empty=false; syncHint(k); save(); if(k==="previjob") rememberSig(); }; im.src=url; };
+  p.size=size;
+  p.clear=()=>{ ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,c.width,c.height);ctx.restore(); p.empty=true; p.img=null; syncHint(k); save(); };
+  p.load=url=>{ if(!url) return; const im=new Image(); im.onload=()=>{ ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,c.width,c.height);ctx.restore(); drawImgFit(im); p.empty=false; syncHint(k); }; im.src=url; };
+  const pos=e=>{ const r=cssRect(); return {x:e.clientX-r.left,y:e.clientY-r.top}; };
+  c.addEventListener("pointerdown",e=>{ e.preventDefault(); c.setPointerCapture(e.pointerId); draw=true; last=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(last.x+.01,last.y); ctx.stroke(); p.empty=false; p.img=null; syncHint(k); });
+  c.addEventListener("pointermove",e=>{ if(!draw) return; e.preventDefault(); const q=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(q.x,q.y); ctx.stroke(); last=q; });
+  const end=()=>{ if(draw){ draw=false; save(); if(k==="previjob"&&typeof rememberSig==="function") rememberSig(); } };
+  c.addEventListener("pointerup",end); c.addEventListener("pointercancel",end); c.addEventListener("contextmenu",e=>e.preventDefault());
+  size(); pads[k]=p; syncHint(k);
 }
 FIRMAS.forEach(([k])=>initPad(k));
 document.querySelectorAll("[data-clear]").forEach(b=>b.onclick=()=>{ pads[b.dataset.clear].clear(); if(b.dataset.clear==="previjob") rememberSig(); });
+
+/* Firma a pantalla completa */
+const mc=$("sigModalCanvas"), mctx=mc.getContext("2d");
+let modalK=null, modalDraw=false, modalLast=null, modalEmpty=true, modalCssW=0, modalCssH=0;
+function prepModalStroke(){ const ratio=Math.max(window.devicePixelRatio||1,1); mctx.setTransform(ratio,0,0,ratio,0,0); mctx.lineWidth=3; mctx.lineCap="round"; mctx.lineJoin="round"; mctx.strokeStyle="#111"; }
+function syncModalHint(){ $("sigModal").classList.toggle("has-sig", !modalEmpty); $("sigModal").classList.toggle("landscape", window.innerWidth>=window.innerHeight); }
+function sizeModal(preset){
+  const r=$("sigModalPad").getBoundingClientRect(), ratio=Math.max(window.devicePixelRatio||1,1);
+  const nw=Math.round(r.width*ratio), nh=Math.round(r.height*ratio);
+  if(nw<=0||nh<=0) return;
+  const keep=(!preset && !modalEmpty && modalCssW && mc.width) ? {url:mc.toDataURL(),w:modalCssW,h:modalCssH} : null;
+  mc.width=nw; mc.height=nh; modalCssW=r.width; modalCssH=r.height; prepModalStroke();
+  const src=preset&&preset.url || keep&&keep.url;
+  if(src){
+    const im=new Image();
+    im.onload=()=>{
+      const rr=mc.getBoundingClientRect();
+      if(preset&&preset.fit){ const sc=Math.min(rr.width/im.width,rr.height/im.height); const w=im.width*sc,h=im.height*sc; mctx.drawImage(im,(rr.width-w)/2,(rr.height-h)/2,w,h); }
+      else { const bw=(preset&&preset.w)||(keep&&keep.w)||rr.width, bh=(preset&&preset.h)||(keep&&keep.h)||rr.height; const sc=Math.min(1,rr.width/bw,rr.height/bh); const w=bw*sc,h=bh*sc; mctx.drawImage(im,(rr.width-w)/2,(rr.height-h)/2,w,h); }
+    };
+    im.src=src;
+  }
+  syncModalHint();
+}
+function openSigModal(k){
+  modalK=k; modalDraw=false; modalCssW=0; modalCssH=0;
+  $("sigModalTitle").textContent="Firma: "+FIRMAS.find(x=>x[0]===k)[1];
+  $("sigModal").hidden=false; document.body.classList.add("sig-open");
+  modalEmpty=pads[k].empty;
+  const preset=pads[k].empty?null: (pads[k].img ? {url:pads[k].img,fit:true} : {url:pads[k].c.toDataURL(),w:pads[k].c.getBoundingClientRect().width,h:pads[k].c.getBoundingClientRect().height});
+  requestAnimationFrame(()=>requestAnimationFrame(()=>sizeModal(preset)));
+}
+function closeSigModal(){ $("sigModal").hidden=true; document.body.classList.remove("sig-open"); modalK=null; modalDraw=false; }
+function acceptSigModal(){
+  if(!modalK) return;
+  if(modalEmpty){ pads[modalK].clear(); if(modalK==="previjob") rememberSig(); }
+  else { const url=trimCanvas(mc)||mc.toDataURL("image/png"); pads[modalK].setImage(url); }
+  closeSigModal();
+}
+const modalPos=e=>{ const r=mc.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top}; };
+mc.addEventListener("pointerdown",e=>{ e.preventDefault(); mc.setPointerCapture(e.pointerId); modalDraw=true; modalLast=modalPos(e); mctx.beginPath(); mctx.moveTo(modalLast.x,modalLast.y); mctx.lineTo(modalLast.x+.01,modalLast.y); mctx.stroke(); modalEmpty=false; syncModalHint(); });
+mc.addEventListener("pointermove",e=>{ if(!modalDraw) return; e.preventDefault(); const q=modalPos(e); mctx.beginPath(); mctx.moveTo(modalLast.x,modalLast.y); mctx.lineTo(q.x,q.y); mctx.stroke(); modalLast=q; });
+const modalEnd=()=>{ modalDraw=false; };
+mc.addEventListener("pointerup",modalEnd); mc.addEventListener("pointercancel",modalEnd); mc.addEventListener("contextmenu",e=>e.preventDefault());
+document.querySelectorAll("[data-full]").forEach(b=>b.onclick=()=>openSigModal(b.dataset.full));
+$("sigModalClear").onclick=()=>{ mctx.save(); mctx.setTransform(1,0,0,1,0,0); mctx.clearRect(0,0,mc.width,mc.height); mctx.restore(); prepModalStroke(); modalEmpty=true; syncModalHint(); };
+$("sigModalCancel").onclick=closeSigModal;
+$("sigModalOk").onclick=acceptSigModal;
+document.addEventListener("keydown",e=>{ if($("sigModal").hidden) return; if(e.key==="Escape"){ e.preventDefault(); closeSigModal(); } });
 
 /* Imagen de firma / sello: subir, pegar (Ctrl+V o botón) */
 function imageToPng(src,max=900){ return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>{ const sc=Math.min(1,max/Math.max(im.width,im.height)); const c=document.createElement("canvas"); c.width=Math.round(im.width*sc); c.height=Math.round(im.height*sc); c.getContext("2d").drawImage(im,0,0,c.width,c.height); res(c.toDataURL("image/png")); }; im.onerror=rej; im.src=src; }); }
@@ -232,7 +348,7 @@ document.addEventListener("paste",e=>{ const a=document.activeElement; if(a&&(a.
 
 /* Recordar firma del técnico */
 const SIGKEY="previjob-firma-tecnico-v1";
-function rememberSig(){ try{ const p=pads.previjob; if($("recordarFirma").checked && !p.empty){ localStorage.setItem(SIGKEY,JSON.stringify({img:p.img||p.c.toDataURL("image/png"),nom:$("nom_previjob").value})); } else if(!$("recordarFirma").checked){ localStorage.removeItem(SIGKEY); } }catch{ toast("No se pudo guardar la firma (espacio lleno)"); } }
+function rememberSig(){ try{ const p=pads.previjob; if($("recordarFirma").checked && !p.empty){ localStorage.setItem(SIGKEY,JSON.stringify({img:exportPad(p),nom:$("nom_previjob").value})); } else if(!$("recordarFirma").checked){ localStorage.removeItem(SIGKEY); } }catch{ toast("No se pudo guardar la firma (espacio lleno)"); } }
 function loadRememberedSig(){ try{ const r=JSON.parse(localStorage.getItem(SIGKEY)||"null"); if(!r) return; $("recordarFirma").checked=true; if(pads.previjob.empty&&r.img) pads.previjob.setImage(r.img); if(!$("nom_previjob").value&&r.nom) $("nom_previjob").value=r.nom; }catch{} }
 $("recordarFirma").addEventListener("change",rememberSig);
 $("nom_previjob").addEventListener("change",rememberSig);
@@ -242,7 +358,9 @@ const EMAILKEY="previjob-email-tecnico-v1";
 function rememberEmail(){ try{ const v=$("email_tecnico").value.trim(); if(v&&$("email_tecnico").checkValidity()) localStorage.setItem(EMAILKEY,v); else if(!v) localStorage.removeItem(EMAILKEY); }catch{} }
 function loadRememberedEmail(){ try{ if($("email_tecnico").value.trim()) return; const v=localStorage.getItem(EMAILKEY)||""; if(v) $("email_tecnico").value=v; }catch{} }
 $("email_tecnico").addEventListener("change",rememberEmail);
-let rz; window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>Object.values(pads).forEach(p=>p.size()),200)});
+let rz; function onPadResize(){ Object.values(pads).forEach(p=>p.size()); if(!$("sigModal").hidden) sizeModal(); }
+window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(onPadResize,200)});
+window.addEventListener("orientationchange",()=>{clearTimeout(rz);rz=setTimeout(onPadResize,250)});
 
 /* ---------- Fotos ---------- */
 let fotos=[];
@@ -261,7 +379,7 @@ function collect(){
   d.act=[...document.querySelectorAll('[data-grp="act"]')].map(x=>x.checked);
   d.actOtra=$("actOtraChk").checked; d.actOtra2=$("actOtraChk2").checked; d.actOtra3=$("actOtraChk3").checked;
   d.for=[...document.querySelectorAll('[data-grp="for"]')].map(x=>x.checked);
-  d.sig={}; FIRMAS.forEach(([k])=>d.sig[k]=pads[k].empty?null:(pads[k].img||pads[k].c.toDataURL("image/png")));
+  d.sig={}; FIRMAS.forEach(([k])=>d.sig[k]=exportPad(pads[k]));
   d.sigIsImg={}; FIRMAS.forEach(([k])=>d.sigIsImg[k]=!!pads[k].img);
   d.fotos=fotos; return d;
 }
